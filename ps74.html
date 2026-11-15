@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistente de Informes del Maestro · PS-74</title>
+<style>
+  /* ============================================================
+     FAMILIA VISUAL: «PAPEL Y TINTA ADMINISTRATIVA»
+     Escritorio gris pizarra · hoja en blanco papel cálido ·
+     tinta azul marino profundo · rojo sello solo como acento.
+     CERO verde. Nada de la identidad de Teachfolio.
+     ============================================================ */
+  :root{
+    --escritorio:#2b2f36; --escritorio2:#20232a;
+    --panel:#e9e5db; --panel-borde:#c6bfae; --panel-tinta:#232a38;
+    --papel:#fffdf5; --tinta:#1d2f52; --tinta2:#31456b; --tinta-suave:#5a6577;
+    --linea:#8f99ab; --linea-suave:#c3cad6; --tira:#e9edf4;
+    --rojo:#a4261f; --rojo-osc:#8c1f1a; --rojo-fondo:#f9e9e7;
+    --sombra:0 10px 34px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--panel-tinta);line-height:1.5;
+    background:radial-gradient(1200px 600px at 50% -80px,#3a404b 0%,var(--escritorio) 55%,var(--escritorio2) 100%);
+    font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif;min-height:100vh}
+
+  /* ---------- Barra superior (UI, no es parte de la hoja) ---------- */
+  .barra{max-width:1280px;margin:0 auto;padding:18px 20px 4px;color:#e8e9ec}
+  .barra h1{font-size:1.35rem;margin:0 0 2px;font-weight:700;letter-spacing:.01em}
+  .barra .sub{margin:0;color:#b9bfc9;font-size:.98rem}
+  .privacidad{max-width:1280px;margin:12px auto 0;padding:0 20px}
+  .privacidad .caja-ui{background:#343943;border:1px solid #4a505c;border-left:6px solid var(--tinta2);
+    border-radius:8px;padding:12px 16px;color:#dfe3e9;font-size:.97rem}
+  .privacidad .chico{display:block;font-size:.88rem;color:#aeb6c2;margin-top:4px}
+  #aviso-voz{display:none;max-width:1240px;margin:12px auto 0;background:var(--rojo-fondo);
+    border-left:6px solid var(--rojo);border-radius:8px;padding:10px 14px;color:#5f1d18;font-size:.96rem}
+
+  /* ---------- La mesa: panel + hoja ---------- */
+  .mesa{max-width:1280px;margin:0 auto;padding:18px 20px 30px;
+    display:grid;grid-template-columns:408px minmax(0,1fr);gap:22px;align-items:start}
+  @media (max-width:960px){.mesa{grid-template-columns:1fr}}
+
+  /* ---------- Panel de entrada (la libreta sobre el escritorio) ---------- */
+  .panel{background:var(--panel);border:1px solid var(--panel-borde);border-radius:10px;
+    box-shadow:var(--sombra);padding:18px 18px 20px}
+  .panel h2{font-size:1.08rem;margin:0 0 4px;color:var(--tinta);letter-spacing:.01em}
+  .panel .seccion-ui{border-top:2px solid var(--panel-borde);padding-top:14px;margin-top:16px}
+  .panel .seccion-ui:first-child{border-top:none;padding-top:0;margin-top:0}
+  .ayuda{color:#5c5648;font-size:.9rem;margin:.1em 0 12px}
+  .campo{margin-bottom:12px}
+  .campo label{display:block;font-weight:700;margin-bottom:5px;color:var(--tinta);font-size:.95rem}
+  .fila{display:flex;gap:8px;align-items:stretch}
+  .fila input{flex:1;min-width:0}
+  input[type="text"],input[type="date"],input[type="time"],textarea{
+    width:100%;padding:10px 11px;font-size:1rem;border:1.5px solid #a9a08c;border-radius:7px;
+    background:#fff;color:var(--panel-tinta);font-family:inherit}
+  input:focus,textarea:focus{outline:2px solid var(--tinta2);outline-offset:0;border-color:var(--tinta2)}
+  textarea.dictado{min-height:64px;resize:vertical}
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  .mic{flex:none;width:46px;border:none;border-radius:7px;background:var(--tinta);color:#fff;
+    font-size:1.2rem;cursor:pointer;line-height:1}
+  .mic:hover{background:var(--tinta2)}
+  .mic.escuchando{background:var(--rojo);color:#fff;animation:pulso 1s infinite}
+  @keyframes pulso{0%{opacity:1}50%{opacity:.55}100%{opacity:1}}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{border:1.5px solid var(--tinta2);background:#fff;color:var(--tinta);border-radius:20px;
+    padding:4px 11px;font-size:.87rem;cursor:pointer;font-family:inherit}
+  .chip:hover{background:var(--tira)}
+  .banco-titulo{font-weight:700;color:var(--tinta);margin-bottom:8px;font-size:.95rem}
+  .frase{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid #cfc8b6;
+    border-radius:8px;padding:9px 11px;margin-bottom:7px;cursor:pointer;
+    font-size:.95rem;color:var(--panel-tinta);font-family:inherit;line-height:1.4}
+  .frase .glosa{display:block;color:#6d675a;font-size:.84rem;font-style:italic;margin-top:2px}
+  .frase:hover{border-color:var(--tinta2)}
+  .frase.sel{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+  .frase.sel .glosa{color:#c3cede}
+  .frase.sel::before{content:"✓ "}
+  .dictado-label{display:block;font-weight:700;margin:12px 0 5px;color:var(--tinta);font-size:.93rem}
+  .check{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+  .check span{border-radius:20px;padding:3px 11px;font-size:.85rem;font-weight:700;
+    background:#ddd7c8;color:#6d675a}
+  .check span.ok{background:var(--tinta);color:#fff}
+  #notas{background:#fff;border:1.5px solid #cfc8b6;border-radius:8px;padding:11px 13px;
+    font-size:.93rem;white-space:pre-wrap;min-height:52px}
+  details.texto-plano{margin-top:14px}
+  details.texto-plano summary{cursor:pointer;font-weight:700;color:var(--tinta);font-size:.95rem}
+  textarea#salida{width:100%;min-height:260px;margin-top:10px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem;padding:12px;
+    border:1.5px dashed var(--tinta2);border-radius:8px;background:#fff;color:var(--panel-tinta);
+    white-space:pre-wrap}
+  .confirmado{color:var(--tinta);font-weight:700;font-size:.93rem;min-height:1.2em;margin-top:8px}
+
+  /* ---------- Botones ---------- */
+  .btn{display:inline-block;border:none;cursor:pointer;border-radius:8px;font-weight:700;
+    font-size:1rem;padding:12px 20px;background:var(--tinta);color:#fff;font-family:inherit}
+  .btn:hover{background:var(--tinta2)}
+  .btn.rojo{background:var(--rojo);color:#fff}
+  .btn.rojo:hover{background:var(--rojo-osc)}
+  .btn.chico{font-size:.9rem;padding:8px 14px}
+  .btn.borde{background:#fff;color:var(--tinta);border:1.5px solid var(--tinta)}
+  .btn.borde:hover{background:var(--tira)}
+  .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+  /* ============================================================
+     LA HOJA — el documento mismo, en serif oficial
+     ============================================================ */
+  .hoja-col{min-width:0}
+  .hoja{background:var(--papel);color:var(--tinta);box-shadow:var(--sombra);
+    border:1px solid #d8d2c0;border-radius:3px;padding:38px 42px 30px;position:relative;
+    font-family:Georgia,"Times New Roman",serif}
+  @media (max-width:620px){.hoja{padding:24px 18px 22px}}
+  .sello{position:absolute;top:20px;right:26px;width:86px;height:86px;border:3px double var(--rojo);
+    border-radius:50%;color:var(--rojo);display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-weight:700;font-size:1.28rem;letter-spacing:.06em;
+    transform:rotate(9deg);opacity:.82;background:rgba(164,38,31,.03)}
+  .hoja-head{text-align:center;border-bottom:2.5px solid var(--tinta);padding-bottom:12px;margin-bottom:16px}
+  .distrito{font-size:.82rem;letter-spacing:.22em;text-transform:uppercase;color:var(--tinta2)}
+  .hoja-titulo{font-size:1.72rem;margin:.18em 0 .05em;font-weight:700;letter-spacing:.02em;
+    text-transform:uppercase;color:var(--tinta)}
+  .hoja-sub{font-size:.9rem;font-style:italic;color:var(--tinta-suave)}
+  .parrilla{display:grid;grid-template-columns:2fr 1.15fr .85fr;gap:0;
+    border:1.5px solid var(--tinta);margin-bottom:18px}
+  .celda{border-right:1px solid var(--linea);border-bottom:1px solid var(--linea);
+    padding:7px 10px 8px;min-height:52px}
+  .celda:nth-child(3n){border-right:none}
+  .celda.ancha{grid-column:span 1}
+  .celda .etq{display:block;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--tinta2);font-family:"Segoe UI",Helvetica,Arial,sans-serif;font-weight:700;margin-bottom:2px}
+  .celda .val{font-size:1.03rem;color:var(--tinta);word-break:break-word}
+  .celda .val.vacio{color:#b6bcc7}
+  .caja-doc{border:1.5px solid var(--tinta);margin-bottom:16px}
+  .caja-tit{background:var(--tira);border-bottom:1px solid var(--linea);padding:7px 12px;
+    font-weight:700;font-size:.95rem;letter-spacing:.05em;text-transform:uppercase;color:var(--tinta);
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .caja-txt{margin:0;padding:11px 13px 13px;font-size:1rem;line-height:1.55;min-height:76px;color:#1c2733}
+  .caja-txt:empty::before{content:attr(data-hint);color:#a7adb8;font-style:italic;font-size:.88rem}
+  .hoja-pie{border-top:1px solid var(--linea-suave);padding-top:8px;font-size:.78rem;
+    color:var(--tinta-suave);font-style:italic;text-align:center}
+  .nota-hoja{color:#c6ccd6;font-size:.93rem;margin:14px 2px 0}
+  .acciones-hoja{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  footer{max-width:1280px;margin:0 auto;padding:0 20px 26px;color:#9aa2af;font-size:.85rem;text-align:center}
+
+  /* ---------- Impresión: SOLO la hoja ---------- */
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+    .mesa{display:block;padding:0;max-width:none}
+    .hoja{box-shadow:none;border:none;margin:0;width:100%;padding:6px 4px}
+    .sello{opacity:.9}
+    @page{margin:11mm}
+  }
+</style>
+</head>
+<body>
+
+<div class="barra no-print">
+  <h1>Asistente de Informes del Maestro · PS-74</h1>
+  <p class="sub">Informe de conducta: usted dicta en español o toca las frases, y <strong>el documento se va llenando frente a usted</strong>, tal como va a quedar.</p>
+</div>
+
+<div class="privacidad no-print">
+  <div class="caja-ui">🔒 <strong>Tus datos no salen de tu computadora.</strong>
+    Esta página no envía ni guarda información en ningún servidor: todo se escribe aquí, en esta pestaña, y se borra cuando usted pulsa «Limpiar todo» o cierra la página.
+    <span class="chico">Nota honesta: esta página <strong>no traduce texto libre</strong>. El inglés profesional sale del banco de frases del panel. Lo que usted dicte con sus palabras queda en «Notas del maestro (español)» pa' su revisión — nunca se mezcla solo al texto en inglés. El dictado por voz lo procesa el servicio de voz de su navegador.</span>
+  </div>
+</div>
+
+<div id="aviso-voz" class="no-print"></div>
+
+<main class="mesa">
+
+  <!-- ================= PANEL DE ENTRADA ================= -->
+  <aside class="panel no-print">
+
+    <div class="seccion-ui">
+      <h2>Progreso del informe</h2>
+      <div class="check" id="check"></div>
+    </div>
+
+    <div class="seccion-ui">
+      <h2>1 · Datos del incidente</h2>
+      <p class="ayuda">Escriba o dicte con el micrófono 🎤. Cada dato aparece al momento en la hoja, en su caja. La fecha y la hora se escriben solas en formato de inglés.</p>
+      <div class="campo">
+        <label for="f-nombre">Nombre del estudiante</label>
+        <div class="fila"><input type="text" id="f-nombre" placeholder="Nombre completo" autocomplete="off"><button type="button" class="mic" data-destino="f-nombre" title="Dictar">🎤</button></div>
+      </div>
+      <div class="dos">
+        <div class="campo">
+          <label for="f-id">ID del estudiante</label>
+          <div class="fila"><input type="text" id="f-id" placeholder="Ej.: 100000000" autocomplete="off"><button type="button" class="mic" data-destino="f-id" title="Dictar">🎤</button></div>
+        </div>
+        <div class="campo">
+          <label for="f-grado">Grado</label>
+          <div class="fila"><input type="text" id="f-grado" placeholder="Ej.: 10" autocomplete="off"><button type="button" class="mic" data-destino="f-grado" title="Dictar">🎤</button></div>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="f-escuela">Escuela</label>
+        <div class="fila"><input type="text" id="f-escuela" placeholder="Nombre de la escuela" autocomplete="off"><button type="button" class="mic" data-destino="f-escuela" title="Dictar">🎤</button></div>
+      </div>
+      <div class="campo">
+        <label for="f-referido">Referido por</label>
+        <div class="fila"><input type="text" id="f-referido" placeholder="Su nombre, como firma el referido" autocomplete="off"><button type="button" class="mic" data-destino="f-referido" title="Dictar">🎤</button></div>
+      </div>
+      <div class="campo">
+        <label for="f-lugar">Lugar</label>
+        <div class="fila"><input type="text" id="f-lugar" placeholder="Ej.: Classroom" autocomplete="off"><button type="button" class="mic" data-destino="f-lugar" title="Dictar">🎤</button></div>
+        <div class="chips" id="chips-lugar"></div>
+      </div>
+      <div class="dos">
+        <div class="campo">
+          <label for="f-fecha">Fecha del incidente</label>
+          <input type="date" id="f-fecha">
+        </div>
+        <div class="campo">
+          <label for="f-hora">Hora del incidente</label>
+          <input type="time" id="f-hora">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-5 · BANCOS DE FRASES (los arma el script) -->
+    <div id="secciones"></div>
+
+    <div class="seccion-ui">
+      <h2>Notas del maestro (español)</h2>
+      <p class="ayuda">Aquí queda, tal cual, lo que usted dictó o escribió con sus palabras en cada sección. <strong>No forma parte del texto en inglés</strong> — es su respaldo pa' revisar que el banco de frases cubrió todo lo importante.</p>
+      <div id="notas">Sin notas dictadas todavía.</div>
+      <div class="acciones">
+        <button type="button" class="btn borde chico" id="btn-copiar-notas">📋 Copiar las notas</button>
+      </div>
+      <div class="confirmado" id="msg-notas"></div>
+    </div>
+
+    <div class="seccion-ui">
+      <h2>El texto que se copia</h2>
+      <p class="ayuda">El botón «Copiar el informe» copia este texto plano completo, listo pa' pegarlo en la forma oficial dentro del sistema del condado. Se actualiza solo, en vivo, igual que la hoja.</p>
+      <details class="texto-plano">
+        <summary>Ver el texto plano del informe</summary>
+        <textarea id="salida" readonly></textarea>
+      </details>
+    </div>
+
+  </aside>
+
+  <!-- ================= LA HOJA (EL DOCUMENTO) ================= -->
+  <section class="hoja-col">
+    <div class="hoja" id="hoja">
+      <div class="sello">PS-74</div>
+      <div class="hoja-head">
+        <div class="distrito">Prince George's County Public Schools</div>
+        <div class="hoja-titulo">Student Discipline Referral</div>
+        <div class="hoja-sub">Form PS-74 · Revised July 1, 2019</div>
+      </div>
+
+      <div class="parrilla">
+        <div class="celda"><span class="etq">Student Name</span><span class="val vacio" id="sh-nombre">—</span></div>
+        <div class="celda"><span class="etq">Student ID</span><span class="val vacio" id="sh-id">—</span></div>
+        <div class="celda"><span class="etq">Grade</span><span class="val vacio" id="sh-grado">—</span></div>
+        <div class="celda"><span class="etq">School</span><span class="val vacio" id="sh-escuela">—</span></div>
+        <div class="celda"><span class="etq">Date of Incident</span><span class="val vacio" id="sh-fecha">—</span></div>
+        <div class="celda"><span class="etq">Time of Incident</span><span class="val vacio" id="sh-hora">—</span></div>
+        <div class="celda"><span class="etq">Location</span><span class="val vacio" id="sh-lugar">—</span></div>
+        <div class="celda" style="grid-column:span 2"><span class="etq">Referred By</span><span class="val vacio" id="sh-referido">—</span></div>
+      </div>
+
+      <div class="caja-doc">
+        <div class="caja-tit">1 · Description of Incident</div>
+        <p class="caja-txt" id="sh-conducta" data-hint="Aquí va apareciendo la descripción del incidente, con las frases que toque en el panel…"></p>
+      </div>
+      <div class="caja-doc">
+        <div class="caja-tit">2 · Interventions Attempted</div>
+        <p class="caja-txt" id="sh-intervenciones" data-hint="Aquí van las intervenciones que usted hizo: redirecciones, conferencia, contacto con los padres…"></p>
+      </div>
+      <div class="caja-doc">
+        <div class="caja-tit">3 · Student Response</div>
+        <p class="caja-txt" id="sh-respuesta" data-hint="Aquí va cómo respondió el estudiante a sus intervenciones…"></p>
+      </div>
+      <div class="caja-doc">
+        <div class="caja-tit">4 · Follow-Up / Disposition</div>
+        <p class="caja-txt" id="sh-seguimiento" data-hint="Aquí va el seguimiento: contactos, referidos, observación, documentación…"></p>
+      </div>
+
+      <div class="hoja-pie">Vista previa con el formato de la forma oficial PS-74 — el informe se presenta en el sistema del condado.</div>
+    </div>
+
+    <p class="nota-hoja no-print">📄 <strong>Lo que usted ve es lo que sale:</strong> esta hoja es la vista previa con el formato de la forma oficial PS-74. Cuando termine, copie el informe y péguelo en la forma oficial dentro del sistema del condado, o imprima esta hoja como su borrador de trabajo.</p>
+
+    <div class="acciones-hoja no-print">
+      <button type="button" class="btn" id="btn-copiar">📋 Copiar el informe</button>
+      <button type="button" class="btn borde" id="btn-imprimir">🖨️ Imprimir la hoja</button>
+      <button type="button" class="btn rojo" id="btn-limpiar">🧹 Limpiar todo</button>
+    </div>
+    <div class="confirmado no-print" id="msg-copia" style="color:#dfe3e9"></div>
+  </section>
+
+</main>
+
+<footer class="no-print">Asistente de Informes del Maestro · Muestra 1: PS-74 · Funciona sin internet una vez abierta la página · Al terminar con un estudiante, pulse «Limpiar todo» antes de pasar al siguiente.</footer>
+
+<script>
+"use strict";
+/* ============================================================
+   ASISTENTE DE INFORMES · PS-74 — LA HOJA SE LLENA EN VIVO
+   Todo corre en esta pestaña: sin red, sin servidor, sin guardar
+   nada fuera de la memoria de la sesión.
+   ============================================================ */
+
+/* ---------- BANCO DE FRASES PROFESIONALES (EN + glosa ES) — ÍNTEGRO ---------- */
+var BANCOS = {
+  conducta: [
+    ["The student disrupted the learning environment by repeatedly talking during instruction after being asked to stop.", "Interrumpió la clase hablando durante la instrucción, tras pedírsele que parara"],
+    ["The student refused to follow directions given by the teacher.", "Se negó a seguir las instrucciones del maestro"],
+    ["Despite multiple verbal prompts, the student continued the behavior.", "A pesar de varias advertencias verbales, continuó la conducta"],
+    ["The student left the assigned area without permission.", "Salió de su área asignada sin permiso"],
+    ["The student left the classroom without authorization.", "Salió del salón sin autorización"],
+    ["The student used inappropriate language in the classroom.", "Usó lenguaje inapropiado en el salón"],
+    ["The student used profanity directed at the teacher.", "Dirigió palabras obscenas al maestro"],
+    ["The student was disrespectful toward the teacher when addressed.", "Fue irrespetuoso con el maestro cuando se le habló"],
+    ["The student made physical contact with another student.", "Hizo contacto físico con otro estudiante"],
+    ["The student threw an object in the classroom.", "Lanzó un objeto en el salón"],
+    ["The student misused school property.", "Usó mal la propiedad de la escuela"],
+    ["The student was repeatedly redirected to remain seated and on task.", "Hubo que redirigirlo repetidamente a sentarse y trabajar"],
+    ["The student refused to complete the assigned work.", "Se negó a completar el trabajo asignado"],
+    ["The student engaged in horseplay that created a safety concern.", "Juegos bruscos que crearon un riesgo de seguridad"],
+    ["The student used a cell phone during instructional time after being directed to put it away.", "Usó el celular en tiempo de instrucción tras la orden de guardarlo"],
+    ["The student's behavior escalated when redirected.", "Su conducta escaló cuando se le redirigió"]
+  ],
+  intervenciones: [
+    ["The student was verbally redirected to the expected behavior.", "Redirección verbal hacia la conducta esperada"],
+    ["Proximity control and a nonverbal prompt were used.", "Control de proximidad y señal no verbal"],
+    ["The teacher held a private conference with the student to review classroom expectations.", "Conferencia privada con el estudiante pa' repasar las normas"],
+    ["The student was offered a brief cool-down period in a designated area of the classroom.", "Período breve de calma en un área designada del salón"],
+    ["The student was moved to a different seat to reduce distractions.", "Cambio de asiento pa' reducir distracciones"],
+    ["A restorative conversation was held with the student.", "Conversación restaurativa con el estudiante"],
+    ["The student was given the opportunity to complete a written reflection on the behavior.", "Oportunidad de completar una reflexión escrita"],
+    ["The student's parent/guardian was contacted by phone.", "Se contactó al padre/madre o encargado por teléfono"],
+    ["Parent contact was attempted; a voicemail message was left.", "Se intentó el contacto con los padres; se dejó mensaje de voz"],
+    ["The school counselor was notified.", "Se notificó al consejero escolar"],
+    ["The student was referred to the school administration.", "Se refirió al estudiante a la administración"]
+  ],
+  respuesta: [
+    ["The student accepted redirection and returned to the assigned task.", "Aceptó la redirección y volvió al trabajo asignado"],
+    ["The student initially refused but complied after a private conference with the teacher.", "Primero se negó, pero cumplió tras la conferencia privada"],
+    ["The student continued the behavior despite redirection.", "Continuó la conducta a pesar de la redirección"],
+    ["The student became verbally defiant when addressed by the teacher.", "Se mostró desafiante verbalmente cuando el maestro le habló"],
+    ["The student calmed down and apologized for the behavior.", "Se calmó y pidió disculpas por la conducta"],
+    ["The student denied engaging in the behavior.", "Negó haber tenido esa conducta"],
+    ["The student was unable to explain the reason for the behavior.", "No pudo explicar el motivo de la conducta"],
+    ["The student agreed to follow classroom expectations for the remainder of the class period.", "Aceptó seguir las normas del salón por el resto de la clase"]
+  ],
+  seguimiento: [
+    ["The parent/guardian was informed of the incident.", "Se informó del incidente al padre/madre o encargado"],
+    ["A parent conference has been requested.", "Se solicitó una reunión con los padres"],
+    ["The incident was referred to the grade-level administrator.", "El incidente se refirió al administrador del grado"],
+    ["The school counselor will follow up with the student.", "El consejero escolar dará seguimiento al estudiante"],
+    ["The student will be monitored during upcoming class periods.", "Se observará al estudiante en las próximas clases"],
+    ["A written behavior reflection was assigned to the student.", "Se asignó una reflexión escrita sobre la conducta"],
+    ["Documentation has been filed for future reference.", "La documentación quedó archivada pa' referencia futura"],
+    ["No further action is requested at this time.", "No se solicita acción adicional por el momento"]
+  ]
+};
+
+var SECCIONES = [
+  { key:"conducta", num:"2", titulo:"¿Qué pasó? — la conducta",
+    salida:"DESCRIPTION OF INCIDENT",
+    ayuda:"Toque las frases que describen lo que pasó (puede tocar varias). Cada una cae dentro de su caja en la hoja, en el orden del banco, como un párrafo profesional.",
+    dictado:"Cuéntelo con sus palabras (opcional)" },
+  { key:"intervenciones", num:"3", titulo:"¿Qué hizo usted? — intervenciones",
+    salida:"INTERVENTIONS ATTEMPTED",
+    ayuda:"Toque todo lo que usted hizo antes y durante el incidente: redirecciones, conferencia, contacto con padres, referidos.",
+    dictado:"Cuéntelo con sus palabras (opcional)" },
+  { key:"respuesta", num:"4", titulo:"¿Cómo respondió el estudiante?",
+    salida:"STUDENT RESPONSE",
+    ayuda:"Toque la frase que mejor describe cómo reaccionó el estudiante a sus intervenciones.",
+    dictado:"Cuéntelo con sus palabras (opcional)" },
+  { key:"seguimiento", num:"5", titulo:"Seguimiento",
+    salida:"FOLLOW-UP / DISPOSITION",
+    ayuda:"Toque lo que sigue después del informe: contactos, referidos, observación, documentación.",
+    dictado:"Cuéntelo con sus palabras (opcional)" }
+];
+
+var LUGARES = [
+  ["Salón de clases","Classroom"],["Pasillo","Hallway"],["Cafetería","Cafeteria"],
+  ["Gimnasio","Gymnasium"],["Biblioteca","Library Media Center"],["Patio","Courtyard"],
+  ["Autobús escolar","School bus"],["Oficina","Main office"]
+];
+
+/* ---------- FUNCIONES PURAS (sin DOM: se pueden probar fuera del navegador) ---------- */
+function estadoVacio(){
+  return {
+    nombre:"", id:"", grado:"", escuela:"", referido:"", fecha:"", hora:"", lugar:"",
+    sel:{ conducta:[], intervenciones:[], respuesta:[], seguimiento:[] },
+    notas:{ conducta:"", intervenciones:"", respuesta:"", seguimiento:"" }
+  };
+}
+
+var MESES_EN = ["January","February","March","April","May","June","July",
+  "August","September","October","November","December"];
+
+function formatDateEN(iso){
+  if(!iso) return "";
+  var p = String(iso).split("-");
+  if(p.length !== 3) return String(iso);
+  var m = parseInt(p[1],10), d = parseInt(p[2],10), y = p[0];
+  if(!(m>=1 && m<=12) || !(d>=1 && d<=31)) return String(iso);
+  return MESES_EN[m-1] + " " + d + ", " + y;
+}
+
+function formatTimeEN(hhmm){
+  if(!hhmm) return "";
+  var p = String(hhmm).split(":");
+  if(p.length < 2) return String(hhmm);
+  var h = parseInt(p[0],10), min = p[1];
+  if(isNaN(h)) return String(hhmm);
+  var suf = h >= 12 ? "PM" : "AM";
+  var h12 = h % 12; if(h12 === 0) h12 = 12;
+  return h12 + ":" + min + " " + suf;
+}
+
+function frasesDe(key, indices){
+  var banco = BANCOS[key] || [];
+  var ordenados = (indices || []).slice().sort(function(a,b){ return a-b; });
+  var out = [];
+  for(var i=0;i<ordenados.length;i++){
+    var f = banco[ordenados[i]];
+    if(f) out.push(f[0]);
+  }
+  return out;
+}
+
+/* Lo que se VE en cada celda y caja de la hoja. La pintura del DOM
+   usa exactamente esto — y las pruebas también. */
+function textosHoja(st){
+  return {
+    nombre: st.nombre || "",
+    id: st.id || "",
+    grado: st.grado || "",
+    escuela: st.escuela || "",
+    referido: st.referido || "",
+    fecha: formatDateEN(st.fecha),
+    hora: formatTimeEN(st.hora),
+    lugar: st.lugar || "",
+    conducta: frasesDe("conducta", st.sel.conducta).join(" "),
+    intervenciones: frasesDe("intervenciones", st.sel.intervenciones).join(" "),
+    respuesta: frasesDe("respuesta", st.sel.respuesta).join(" "),
+    seguimiento: frasesDe("seguimiento", st.sel.seguimiento).join(" ")
+  };
+}
+
+/* El texto plano completo que se copia y se pega en la forma oficial. */
+function composeReport(st){
+  var linea = "____________________";
+  var L = [];
+  L.push("PS-74 — STUDENT DISCIPLINE REFERRAL");
+  L.push("(Narrative text prepared with the Teacher Report Assistant — paste into the official form)");
+  L.push("");
+  L.push("Student: " + (st.nombre || linea));
+  L.push("Student ID: " + (st.id || linea));
+  L.push("Grade: " + (st.grado || linea));
+  L.push("School: " + (st.escuela || linea));
+  L.push("Date of Incident: " + (formatDateEN(st.fecha) || linea));
+  L.push("Time of Incident: " + (formatTimeEN(st.hora) || linea));
+  L.push("Location: " + (st.lugar || linea));
+  L.push("Referred By: " + (st.referido || linea));
+  for(var i=0;i<SECCIONES.length;i++){
+    var s = SECCIONES[i];
+    var frases = frasesDe(s.key, st.sel[s.key]);
+    if(frases.length){
+      L.push("");
+      L.push(s.salida);
+      L.push(frases.join(" "));
+    }
+  }
+  return L.join("\n");
+}
+
+/* Las notas dictadas, separadas y etiquetadas: NO son parte del texto en inglés. */
+function buildNotes(st){
+  var nombres = { conducta:"Qué pasó", intervenciones:"Qué hizo el maestro",
+    respuesta:"Cómo respondió el estudiante", seguimiento:"Seguimiento" };
+  var L = [];
+  for(var i=0;i<SECCIONES.length;i++){
+    var s = SECCIONES[i];
+    var t = (st.notas[s.key] || "").replace(/\s+/g," ").trim();
+    if(t) L.push("• " + nombres[s.key] + ": " + t);
+  }
+  if(!L.length) return "";
+  return "NOTAS DEL MAESTRO (en español — respaldo pa' revisar; NO forman parte del texto en inglés)\n" + L.join("\n");
+}
+
+function seccionesListas(st){
+  var r = { datos: !!(st.nombre && st.fecha), conducta:false, intervenciones:false,
+    respuesta:false, seguimiento:false };
+  for(var i=0;i<SECCIONES.length;i++){
+    var s = SECCIONES[i];
+    r[s.key] = (st.sel[s.key] || []).length > 0;
+  }
+  return r;
+}
+
+/* ---------- PARTE DEL NAVEGADOR (solo corre si hay DOM) ---------- */
+if (typeof document !== "undefined") {
+
+  var estado = estadoVacio();
+
+  function el(id){ return document.getElementById(id); }
+
+  function leerEstado(){
+    estado.nombre   = el("f-nombre").value.trim();
+    estado.id       = el("f-id").value.trim();
+    estado.grado    = el("f-grado").value.trim();
+    estado.escuela  = el("f-escuela").value.trim();
+    estado.referido = el("f-referido").value.trim();
+    estado.fecha    = el("f-fecha").value;
+    estado.hora     = el("f-hora").value;
+    estado.lugar    = el("f-lugar").value.trim();
+    for(var i=0;i<SECCIONES.length;i++){
+      var s = SECCIONES[i];
+      estado.notas[s.key] = el("dictado-" + s.key).value;
+    }
+    return estado;
+  }
+
+  function pintarCelda(id, valor){
+    var n = el(id);
+    if(!n) return;
+    if(valor){ n.textContent = valor; n.classList.remove("vacio"); }
+    else { n.textContent = "—"; n.classList.add("vacio"); }
+  }
+
+  /* LA HOJA SE LLENA EN VIVO: cada dato y cada frase cae en su caja. */
+  function refrescar(){
+    leerEstado();
+    var t = textosHoja(estado);
+    pintarCelda("sh-nombre", t.nombre);
+    pintarCelda("sh-id", t.id);
+    pintarCelda("sh-grado", t.grado);
+    pintarCelda("sh-escuela", t.escuela);
+    pintarCelda("sh-fecha", t.fecha);
+    pintarCelda("sh-hora", t.hora);
+    pintarCelda("sh-lugar", t.lugar);
+    pintarCelda("sh-referido", t.referido);
+    el("sh-conducta").textContent = t.conducta;
+    el("sh-intervenciones").textContent = t.intervenciones;
+    el("sh-respuesta").textContent = t.respuesta;
+    el("sh-seguimiento").textContent = t.seguimiento;
+    el("salida").value = composeReport(estado);
+    var n = buildNotes(estado);
+    el("notas").textContent = n ? n : "Sin notas dictadas todavía.";
+    var r = seccionesListas(estado);
+    var nombres = { datos:"Datos", conducta:"Conducta", intervenciones:"Intervenciones",
+      respuesta:"Respuesta del estudiante", seguimiento:"Seguimiento" };
+    var html = "";
+    for(var k in nombres){
+      html += '<span class="' + (r[k] ? "ok" : "") + '">' + (r[k] ? "✓ " : "• ") + nombres[k] + "</span>";
+    }
+    el("check").innerHTML = html;
+  }
+
+  function construirSecciones(){
+    var cont = el("secciones");
+    for(var i=0;i<SECCIONES.length;i++){
+      (function(s){
+        var sec = document.createElement("div");
+        sec.className = "seccion-ui";
+        var bancoHtml = "";
+        for(var j=0;j<BANCOS[s.key].length;j++){
+          bancoHtml += '<button type="button" class="frase" data-sec="' + s.key + '" data-idx="' + j + '">'
+            + BANCOS[s.key][j][0] + '<span class="glosa">' + BANCOS[s.key][j][1] + '</span></button>';
+        }
+        sec.innerHTML = "<h2>" + s.num + " · " + s.titulo + "</h2>"
+          + '<p class="ayuda">' + s.ayuda + "</p>"
+          + '<div class="banco-titulo">Banco de frases en inglés — toque pa\' escoger:</div>'
+          + '<div class="banco">' + bancoHtml + "</div>"
+          + '<label class="dictado-label" for="dictado-' + s.key + '">' + s.dictado + "</label>"
+          + '<div class="fila"><textarea class="dictado" id="dictado-' + s.key + '" placeholder="Dicte o escriba en español. Esto queda en sus notas, no se traduce solo."></textarea>'
+          + '<button type="button" class="mic" data-destino="dictado-' + s.key + '" title="Dictar">🎤</button></div>';
+        cont.appendChild(sec);
+      })(SECCIONES[i]);
+    }
+    var frases = document.querySelectorAll(".frase");
+    for(var f=0; f<frases.length; f++){
+      frases[f].addEventListener("click", function(){
+        var key = this.getAttribute("data-sec");
+        var idx = parseInt(this.getAttribute("data-idx"), 10);
+        var arr = estado.sel[key];
+        var pos = arr.indexOf(idx);
+        if(pos >= 0){ arr.splice(pos,1); this.classList.remove("sel"); }
+        else { arr.push(idx); this.classList.add("sel"); }
+        refrescar();
+      });
+    }
+    var dictados = document.querySelectorAll(".dictado");
+    for(var d=0; d<dictados.length; d++){
+      dictados[d].addEventListener("input", refrescar);
+    }
+  }
+
+  function construirLugares(){
+    var cont = el("chips-lugar");
+    for(var i=0;i<LUGARES.length;i++){
+      (function(par){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "chip"; b.textContent = par[0];
+        b.addEventListener("click", function(){ el("f-lugar").value = par[1]; refrescar(); });
+        cont.appendChild(b);
+      })(LUGARES[i]);
+    }
+  }
+
+  /* ----- Micrófono: reconocimiento de voz del navegador, en español ----- */
+  var SR = null;
+  try { SR = window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+  catch(e) { SR = null; }
+
+  var reconActivo = null;
+
+  function avisarVoz(msg){
+    var a = el("aviso-voz");
+    a.style.display = "block";
+    a.textContent = msg;
+  }
+
+  function dictar(btn, destino){
+    if(!SR){
+      avisarVoz("Su navegador no admite dictado por voz. Pruebe con Chrome o Edge, o escriba a mano — todo lo demás funciona igual.");
+      return;
+    }
+    if(reconActivo){ try { reconActivo.stop(); } catch(e){} reconActivo = null; return; }
+    var campo = el(destino);
+    if(!campo) return;
+    var rec;
+    try { rec = new SR(); } catch(e) {
+      avisarVoz("No se pudo abrir el micrófono. Escriba a mano, por favor.");
+      return;
+    }
+    rec.lang = "es-ES";
+    rec.interimResults = true;
+    rec.continuous = false;
+    var base = campo.value.replace(/\s+$/,"");
+    rec.onresult = function(ev){
+      var texto = "";
+      for(var i=0;i<ev.results.length;i++){ texto += ev.results[i][0].transcript; }
+      campo.value = (base ? base + " " : "") + texto;
+      campo.dispatchEvent(new Event("input", { bubbles:true }));
+      refrescar();
+    };
+    rec.onerror = function(ev){
+      btn.classList.remove("escuchando");
+      reconActivo = null;
+      if(ev.error === "not-allowed" || ev.error === "service-not-allowed"){
+        avisarVoz("El navegador bloqueó el micrófono. Permítalo en la barra de direcciones (icono de candado) o escriba a mano.");
+      } else if(ev.error !== "aborted" && ev.error !== "no-speech"){
+        avisarVoz("El dictado se detuvo (" + ev.error + "). Puede intentar de nuevo o escribir a mano.");
+      }
+    };
+    rec.onend = function(){ btn.classList.remove("escuchando"); reconActivo = null; };
+    try {
+      rec.start();
+      reconActivo = rec;
+      btn.classList.add("escuchando");
+    } catch(e) {
+      avisarVoz("No se pudo iniciar el dictado. Escriba a mano, por favor.");
+    }
+  }
+
+  function conectarMicrofonos(){
+    var mics = document.querySelectorAll(".mic");
+    for(var i=0;i<mics.length;i++){
+      mics[i].addEventListener("click", function(){
+        dictar(this, this.getAttribute("data-destino"));
+      });
+    }
+    if(!SR){
+      avisarVoz("Su navegador no admite dictado por voz (en Chrome y Edge funciona). Todo lo demás — campos, banco de frases y la hoja — funciona igual escribiendo a mano.");
+    }
+  }
+
+  /* ----- Copiar (con respaldo si el portapapeles está bloqueado) ----- */
+  function copiarTexto(texto, msgEl, okMsg){
+    function hecho(){ el(msgEl).textContent = okMsg; }
+    function respaldo(){
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = texto;
+        ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        hecho();
+      } catch(e) {
+        el(msgEl).textContent = "No se pudo copiar solo. Abra «Ver el texto plano del informe» en el panel, selecciónelo y cópielo a mano (Ctrl+C).";
+      }
+    }
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(texto).then(hecho, respaldo);
+      } else { respaldo(); }
+    } catch(e) { respaldo(); }
+  }
+
+  /* ----- Limpiar todo: borra los datos del estudiante al instante ----- */
+  function limpiarTodo(){
+    if(!window.confirm("¿Borrar TODO lo de este estudiante (nombre, ID, frases y notas)? La hoja vuelve a quedar en blanco. No se puede deshacer.")) return;
+    if(reconActivo){ try { reconActivo.stop(); } catch(e){} reconActivo = null; }
+    estado = estadoVacio();
+    var campos = ["f-nombre","f-id","f-grado","f-escuela","f-referido","f-fecha","f-hora","f-lugar"];
+    for(var i=0;i<campos.length;i++){ el(campos[i]).value = ""; }
+    for(var j=0;j<SECCIONES.length;j++){ el("dictado-" + SECCIONES[j].key).value = ""; }
+    var frases = document.querySelectorAll(".frase.sel");
+    for(var f=0; f<frases.length; f++){ frases[f].classList.remove("sel"); }
+    el("msg-copia").textContent = "";
+    el("msg-notas").textContent = "";
+    refrescar();
+    el("f-nombre").focus();
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function iniciar(){
+    construirSecciones();
+    construirLugares();
+    conectarMicrofonos();
+    var datos = ["f-nombre","f-id","f-grado","f-escuela","f-referido","f-fecha","f-hora","f-lugar"];
+    for(var i=0;i<datos.length;i++){
+      el(datos[i]).addEventListener("input", refrescar);
+      el(datos[i]).addEventListener("change", refrescar);
+    }
+    el("btn-copiar").addEventListener("click", function(){
+      refrescar();
+      copiarTexto(el("salida").value, "msg-copia", "✓ Informe copiado. Péguelo en la forma oficial PS-74 dentro del sistema del condado.");
+    });
+    el("btn-imprimir").addEventListener("click", function(){
+      refrescar();
+      window.print();
+    });
+    el("btn-copiar-notas").addEventListener("click", function(){
+      leerEstado();
+      var n = buildNotes(estado);
+      if(!n){ el("msg-notas").textContent = "Todavía no hay notas dictadas."; return; }
+      copiarTexto(n, "msg-notas", "✓ Notas copiadas.");
+    });
+    el("btn-limpiar").addEventListener("click", limpiarTodo);
+    refrescar();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", iniciar);
+  } else { iniciar(); }
+}
+</script>
+</body>
+</html>
