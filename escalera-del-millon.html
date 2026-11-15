@@ -212,6 +212,17 @@
   .resumen-panel{display:flex; gap:22px; flex-wrap:wrap; margin:10px 0; font-size:16px}
   .resumen-panel b{color:var(--oro-claro); font-size:21px}
   .aviso-huella{color:#ff9a9a; font-size:14px; margin-top:8px}
+
+  /* Bancos listos y foto de la lección */
+  .caja-lista{border:1.5px dashed rgba(245,197,66,.55); border-radius:14px; padding:16px; background:rgba(4,8,38,.35); margin-bottom:6px}
+  .caja-lista h3{margin-top:0}
+  select{cursor:pointer}
+  .aviso-borrador{border:1.5px dashed var(--naranja); background:rgba(255,140,26,.14); color:#ffd9ae; border-radius:12px; padding:11px 14px; font-size:14.5px; line-height:1.5; margin:12px 0}
+  input[type=file]{width:100%; font:inherit; font-size:14.5px; color:var(--blanco); background:rgba(4,8,38,.45); border:1.5px dashed #54679f; border-radius:10px; padding:11px}
+  .foto-previa{max-width:100%; max-height:260px; border-radius:12px; border:2px solid rgba(245,197,66,.55); margin-top:12px}
+  .progreso{display:flex; align-items:center; gap:10px; margin-top:12px; font-size:14px}
+  .progreso .pista{flex:1; background:#0a1440; border-radius:999px; height:18px; overflow:hidden; border:1px solid #54679f}
+  .progreso .relleno{display:block; height:100%; width:0; background:linear-gradient(90deg,#3350e0,var(--oro)); transition:width .3s ease}
   footer{text-align:center; color:var(--gris); font-size:12.5px; margin-top:26px; line-height:1.6}
 </style>
 </head>
@@ -234,8 +245,21 @@
     <div class="tarjeta">
       <h2>Construye el banco de preguntas de tu clase</h2>
       <p class="ayuda">Escribe las preguntas de tu tema con sus 4 opciones y marca la correcta. <b>El orden importa:</b> la primera pregunta vale $100 y cada siguiente sube un peldaño de la escalera, así que ponlas <b>de la más fácil a la más difícil</b>. Necesitas un mínimo de <b>5 preguntas</b> (la escalera llega hasta 15). Si escribes <b>más de 15</b>, las extras quedan como repuestos para el comodín «Cambio de pregunta». Tu banco se guarda solo en este navegador.</p>
+      <div class="caja-lista">
+        <h3>📚 ¿Sin tiempo de escribir? Bancos listos pa' escoger</h3>
+        <p class="ayuda">Preguntas ya hechas, por materia y nivel. Escoge un banco y juega <b>al instante</b>, o cárgalo en el editor y ajústalo a tu clase antes de jugar. El enlace de juego y el código de resultado funcionan igual con un banco listo que con uno tuyo.</p>
+        <label class="etiqueta" for="sel-bancos" style="margin-top:4px">Bancos de preguntas listos</label>
+        <select id="sel-bancos"></select>
+        <p class="contador" id="info-banco-listo"></p>
+        <div class="fila-botones">
+          <button class="btn" id="btn-listo-jugar" type="button">▶️ ¡Jugar con este banco ya!</button>
+          <button class="btn secundario" id="btn-listo-editar" type="button">✏️ Cargar en el editor</button>
+        </div>
+      </div>
+      <p class="ayuda" style="margin-top:14px">✍️ <b>O crea el tuyo aquí abajo</b> (y todo banco que cargues — listo o de una foto — cae aquí pa' que lo edites):</p>
       <label class="etiqueta" for="banco-titulo">Título de la clase o tema</label>
       <input type="text" id="banco-titulo" placeholder="Ej.: Ciencias — El sistema solar (5.º grado)">
+      <div class="aviso-borrador oculto" id="aviso-borrador">📸 <b>Borrador generado de tu foto — revísalo antes de jugar.</b> La lectura automática (OCR) puede equivocarse según la foto: corrige aquí cualquier palabra rara, cambia opciones y marca bien la correcta. Cuando lo dejes a tu gusto, pulsa «Jugar con mi banco».</div>
       <div id="lista-preguntas"></div>
       <p class="contador" id="contador-preguntas"></p>
       <div class="fila-botones">
@@ -248,6 +272,21 @@
       </div>
       <p class="ayuda" style="margin-top:12px">El <b>enlace de juego</b> lleva tu banco dentro del propio enlace: compártelo (en tu LMS, por correo o donde quieras) y quien lo abra verá el juego con <b>tus</b> preguntas, sin cuentas ni servidores.</p>
       <p class="mensaje" id="msg-constructor"></p>
+    </div>
+
+    <div class="tarjeta" style="margin-top:18px">
+      <h2>📸 Retrata tu lección</h2>
+      <p class="ayuda">¿Tu lección está en un libro, una hoja impresa o la pizarra? <b>Sácale una foto</b> y el juego lee la página y te propone preguntas <b>de esa lección</b>: si la página trae listas de vocabulario, crea preguntas de pareo con 4 opciones; si trae oraciones o párrafos, crea preguntas de completar (tapa una palabra y ofrece 3 parecidas del mismo texto). Genera hasta <b>15 preguntas</b> y caen en el editor de arriba como <b>borrador</b> pa' que las revises antes de jugar.</p>
+      <p class="ayuda">🔒 <b>Tu foto no sale de tu navegador:</b> la lectura (OCR) ocurre en tu propio equipo, aquí mismo. Lo único que se descarga — y solo la primera vez que tocas esta función — es la herramienta de lectura; la página por sí sola no hace ninguna llamada de red.</p>
+      <label class="etiqueta" for="foto-input">Foto de la página de tu lección</label>
+      <input type="file" id="foto-input" accept="image/*" capture="environment">
+      <img id="foto-preview" class="foto-previa oculto" alt="Vista previa de la foto de tu lección">
+      <div class="fila-botones">
+        <button class="btn" id="btn-foto" type="button">📸 Leer la foto y generar preguntas</button>
+      </div>
+      <div class="progreso oculto" id="foto-progreso"><span class="pista"><span class="relleno" id="foto-progreso-relleno"></span></span><span id="foto-progreso-texto">Leyendo…</span></div>
+      <p class="mensaje" id="msg-foto"></p>
+      <p class="ayuda" style="margin-top:10px">Consejo: foto <b>cerca, derecha y con buena luz</b>, que se vea la página completa. Si la foto sale borrosa o torcida, la lectura sale pobre y el juego te lo dice claro en vez de inventar preguntas.</p>
     </div>
   </section>
 
@@ -398,6 +437,319 @@ const BANCO_EJEMPLO = {
     { texto:'¿Cómo se dice «horse» en español?', opciones:['el toro','la vaca','el caballo','el cerdo'], correcta:2 }
   ]
 };
+
+/* === BANCOS LISTOS — preguntas prehechas pa' escoger, por materia y nivel ===
+   Cada banco: 10–15 preguntas originales, de la más fácil a la más difícil,
+   con la correcta verificada a mano. El de Los Animales reutiliza las
+   preguntas del banco de ejemplo (BANCO_EJEMPLO). */
+const BANCOS_LISTOS = [
+  { materia:'Español', nivel:'Grados 1–4', etiqueta:'Los Animales · Grados 1–4 · 10 preguntas',
+    banco:{ titulo:'Los Animales — Vocabulario en Español', preguntas: BANCO_EJEMPLO.preguntas } },
+  { materia:'Español', nivel:'Grados 1–4', etiqueta:'La Casa y la Familia · Grados 1–4 · 12 preguntas',
+    banco:{ titulo:'La Casa y la Familia — Vocabulario en Español', preguntas:[
+      { texto:'¿Cómo se dice «house» en español?', opciones:['el carro','la casa','la escuela','el parque'], correcta:1 },
+      { texto:'La madre de tu madre es tu…', opciones:['tía','hermana','abuela','prima'], correcta:2 },
+      { texto:'¿En qué parte de la casa dormimos?', opciones:['la cocina','el baño','el garaje','el dormitorio'], correcta:3 },
+      { texto:'El esposo de mi tía es mi…', opciones:['tío','abuelo','primo','hermano'], correcta:0 },
+      { texto:'¿Cómo se dice «kitchen» en español?', opciones:['la sala','la cocina','el techo','la puerta'], correcta:1 },
+      { texto:'Los hijos de mis tíos son mis…', opciones:['hermanos','sobrinos','primos','nietos'], correcta:2 },
+      { texto:'¿Dónde nos bañamos?', opciones:['en la cocina','en el patio','en la sala','en el baño'], correcta:3 },
+      { texto:'El hijo de mi hermano es mi…', opciones:['sobrino','primo','tío','cuñado'], correcta:0 },
+      { texto:'¿Cómo se dice «living room» en español?', opciones:['el sótano','la sala','el ático','el pasillo'], correcta:1 },
+      { texto:'La hermana de mi padre es mi…', opciones:['abuela','prima','tía','sobrina'], correcta:2 },
+      { texto:'¿Qué usamos para subir al segundo piso de la casa?', opciones:['la ventana','la pared','el espejo','la escalera'], correcta:3 },
+      { texto:'El padre de mi padre es mi…', opciones:['abuelo','tío','primo','sobrino'], correcta:0 }
+    ] } },
+  { materia:'Español', nivel:'Grados K–3', etiqueta:'Los Colores y los Números · Grados K–3 · 12 preguntas',
+    banco:{ titulo:'Los Colores y los Números — Español', preguntas:[
+      { texto:'¿De qué color es el sol?', opciones:['azul','amarillo','verde','negro'], correcta:1 },
+      { texto:'¿Cómo se dice «red» en español?', opciones:['rosa','gris','rojo','marrón'], correcta:2 },
+      { texto:'¿Cuánto es 2 + 2?', opciones:['tres','cinco','seis','cuatro'], correcta:3 },
+      { texto:'El color de la hierba (grass) es…', opciones:['verde','rojo','blanco','anaranjado'], correcta:0 },
+      { texto:'¿Cómo se dice «ten» en español?', opciones:['dos','diez','doce','veinte'], correcta:1 },
+      { texto:'¿De qué color es el cielo en un día bonito?', opciones:['café','morado','azul','plateado'], correcta:2 },
+      { texto:'¿Cuánto es 5 + 5?', opciones:['nueve','once','ocho','diez'], correcta:3 },
+      { texto:'La mezcla de rojo y blanco da el color…', opciones:['rosado','verde','gris','negro'], correcta:0 },
+      { texto:'¿Cómo se dice «one hundred» en español?', opciones:['mil','cien','diez','cincuenta'], correcta:1 },
+      { texto:'¿Cuánto es 10 − 3?', opciones:['seis','ocho','siete','trece'], correcta:2 },
+      { texto:'El color de una naranja es…', opciones:['amarillo','turquesa','beige','anaranjado'], correcta:3 },
+      { texto:'¿Cuánto es 7 + 8?', opciones:['quince','catorce','dieciséis','trece'], correcta:0 }
+    ] } },
+  { materia:'Español', nivel:'Grados 2–5', etiqueta:'El Cuerpo y la Salud · Grados 2–5 · 12 preguntas',
+    banco:{ titulo:'El Cuerpo y la Salud — Vocabulario en Español', preguntas:[
+      { texto:'¿Con qué parte del cuerpo vemos?', opciones:['las orejas','los ojos','la nariz','la boca'], correcta:1 },
+      { texto:'¿Cómo se dice «hand» en español?', opciones:['el pie','el brazo','la mano','la pierna'], correcta:2 },
+      { texto:'¿Qué parte del cuerpo usamos para caminar?', opciones:['los brazos','el pelo','los dientes','las piernas'], correcta:3 },
+      { texto:'El órgano que bombea la sangre es…', opciones:['el corazón','el estómago','el cerebro','el hueso'], correcta:0 },
+      { texto:'Escuchamos la música con…', opciones:['la lengua','las orejas','la frente','el codo'], correcta:1 },
+      { texto:'¿Cómo se dice «head» en español?', opciones:['la espalda','la rodilla','el dedo','la cabeza'], correcta:3 },
+      { texto:'¿Qué debemos hacer después de ir al baño?', opciones:['lavarnos las manos','correr','dormir','comer dulces'], correcta:0 },
+      { texto:'Los dientes se cepillan…', opciones:['una vez al año','todos los días','nunca','solo los lunes'], correcta:1 },
+      { texto:'La parte del cuerpo que está dentro de la cabeza y piensa es…', opciones:['el corazón','el músculo','el cerebro','la piel'], correcta:2 },
+      { texto:'Si te duele la garganta, ¿a quién visitas?', opciones:['al maestro','al cocinero','al bombero','al doctor'], correcta:3 },
+      { texto:'¿Cómo se dice «knee» en español?', opciones:['la rodilla','el hombro','el tobillo','la muñeca'], correcta:0 },
+      { texto:'Para tener huesos fuertes tomamos…', opciones:['refresco','leche','dulces','papas fritas'], correcta:1 }
+    ] } },
+  { materia:'Mathematics', nivel:'Grades 3–5', etiqueta:'Multiplication Facts · Grades 3–5 · 12 questions',
+    banco:{ titulo:'Multiplication Facts', preguntas:[
+      { texto:'What is 2 × 3?', opciones:['5','6','8','9'], correcta:1 },
+      { texto:'What is 4 × 2?', opciones:['6','12','8','10'], correcta:2 },
+      { texto:'What is 3 × 3?', opciones:['6','12','8','9'], correcta:3 },
+      { texto:'What is 5 × 4?', opciones:['20','15','25','9'], correcta:0 },
+      { texto:'What is 6 × 3?', opciones:['16','18','21','15'], correcta:1 },
+      { texto:'What is 7 × 2?', opciones:['12','16','14','21'], correcta:2 },
+      { texto:'What is 4 × 4?', opciones:['12','20','24','16'], correcta:3 },
+      { texto:'What is 8 × 5?', opciones:['40','35','45','30'], correcta:0 },
+      { texto:'What is 6 × 6?', opciones:['30','36','42','32'], correcta:1 },
+      { texto:'What is 7 × 8?', opciones:['54','48','56','64'], correcta:2 },
+      { texto:'What is 9 × 7?', opciones:['72','56','81','63'], correcta:3 },
+      { texto:'What is 12 × 4?', opciones:['48','44','36','52'], correcta:0 }
+    ] } },
+  { materia:'Mathematics', nivel:'Grades 5–7', etiqueta:'Fractions Basics · Grades 5–7 · 12 questions',
+    banco:{ titulo:'Fractions Basics', preguntas:[
+      { texto:'In the fraction 3/4, the number 4 is called the…', opciones:['numerator','denominator','factor','sum'], correcta:1 },
+      { texto:'Which fraction is equal to 1/2?', opciones:['1/3','3/5','2/4','2/3'], correcta:2 },
+      { texto:'What is 1/4 + 2/4?', opciones:['3/8','2/8','1/2','3/4'], correcta:3 },
+      { texto:'Which fraction is the largest?', opciones:['3/4','1/4','1/2','1/8'], correcta:0 },
+      { texto:'The fraction 5/5 is equal to…', opciones:['5','1','0','25'], correcta:1 },
+      { texto:'In the fraction 7/8, the numerator is…', opciones:['8','15','7','1'], correcta:2 },
+      { texto:'What is 2/3 − 1/3?', opciones:['1/6','3/3','2/6','1/3'], correcta:3 },
+      { texto:'Which fraction is in simplest form?', opciones:['3/5','2/4','4/6','6/9'], correcta:0 },
+      { texto:'What is 1/2 of 10?', opciones:['2','5','10','20'], correcta:1 },
+      { texto:'How many twelfths ( ? /12) are equal to 3/4?', opciones:['6','8','9','3'], correcta:2 },
+      { texto:'Which of these is an improper fraction?', opciones:['3/4','1/2','4/7','7/4'], correcta:3 },
+      { texto:'What is 2/5 + 1/5?', opciones:['3/5','3/10','2/10','1/5'], correcta:0 }
+    ] } },
+  { materia:'Science', nivel:'Grades 1–3', etiqueta:'Life Cycles · Grades 1–3 · 12 questions',
+    banco:{ titulo:'Life Cycles', preguntas:[
+      { texto:'A baby frog is called a…', opciones:['caterpillar','tadpole','chick','calf'], correcta:1 },
+      { texto:'What does a caterpillar turn into?', opciones:['a frog','a bird','a butterfly','a fish'], correcta:2 },
+      { texto:'A seed grows into a…', opciones:['a rock','an egg','a cloud','a plant'], correcta:3 },
+      { texto:'A baby dog is a…', opciones:['puppy','kitten','cub','lamb'], correcta:0 },
+      { texto:'Which comes FIRST in the life of a butterfly?', opciones:['the butterfly','the egg','the chrysalis','the caterpillar'], correcta:1 },
+      { texto:'A baby cat is a…', opciones:['puppy','calf','kitten','foal'], correcta:2 },
+      { texto:'What does a tadpole grow into?', opciones:['a snake','a fish','a turtle','a frog'], correcta:3 },
+      { texto:'A chicken hatches from…', opciones:['an egg','a seed','a flower','a cocoon'], correcta:0 },
+      { texto:'What do plants need to grow?', opciones:['candy','sunlight and water','only darkness','snow'], correcta:1 },
+      { texto:'A baby cow is a…', opciones:['lamb','kid','calf','piglet'], correcta:2 },
+      { texto:'The stage when a caterpillar rests inside a chrysalis is part of…', opciones:['hibernation','migration','photosynthesis','metamorphosis'], correcta:3 },
+      { texto:'In what order does a plant grow?', opciones:['seed → sprout → plant','plant → seed → sprout','sprout → seed → plant','flower → seed → root'], correcta:0 }
+    ] } },
+  { materia:'Science', nivel:'Grades 4–6', etiqueta:'The Solar System · Grades 4–6 · 12 questions',
+    banco:{ titulo:'The Solar System', preguntas:[
+      { texto:'Which planet is closest to the Sun?', opciones:['Venus','Mercury','Earth','Mars'], correcta:1 },
+      { texto:'The planet we live on is…', opciones:['Mars','Jupiter','Earth','Saturn'], correcta:2 },
+      { texto:'Which planet is known as the Red Planet?', opciones:['Venus','Neptune','Mercury','Mars'], correcta:3 },
+      { texto:'The largest planet in our solar system is…', opciones:['Jupiter','Saturn','Neptune','Earth'], correcta:0 },
+      { texto:'Which planet has beautiful rings around it?', opciones:['Mars','Saturn','Venus','Mercury'], correcta:1 },
+      { texto:'The Sun is a…', opciones:['planet','moon','star','comet'], correcta:2 },
+      { texto:'How long does Earth take to travel around the Sun one time?', opciones:['one day','one week','one month','one year'], correcta:3 },
+      { texto:'How many moons does Earth have?', opciones:['one','two','twelve','none'], correcta:0 },
+      { texto:'Which planet is farthest from the Sun?', opciones:['Uranus','Neptune','Saturn','Jupiter'], correcta:1 },
+      { texto:'What force keeps the planets in orbit around the Sun?', opciones:['magnetism','friction','gravity','wind'], correcta:2 },
+      { texto:'The planet known for its Great Red Spot is…', opciones:['Mars','Saturn','Venus','Jupiter'], correcta:3 },
+      { texto:'Which planet is the hottest?', opciones:['Venus','Mercury','Mars','Jupiter'], correcta:0 }
+    ] } },
+  { materia:'English / ELA', nivel:'Grades K–2', etiqueta:'Sight Words · Grades K–2 · 12 questions',
+    banco:{ titulo:'Sight Words', preguntas:[
+      { texto:'I ___ to school every day.', opciones:['was','go','the','said'], correcta:1 },
+      { texto:'She ___ my friend.', opciones:['and','you','is','my'], correcta:2 },
+      { texto:'We ___ playing outside.', opciones:['the','it','to','are'], correcta:3 },
+      { texto:'___ is my book? (You are asking where it is.)', opciones:['Where','What','Who','When'], correcta:0 },
+      { texto:'He said he ___ do it.', opciones:['an','can','on','in'], correcta:1 },
+      { texto:'Look at ___ dog!', opciones:['was','has','that','had'], correcta:2 },
+      { texto:'I ___ a red apple.', opciones:['of','do','to','have'], correcta:3 },
+      { texto:'She went ___ the store.', opciones:['to','two','too','toe'], correcta:0 },
+      { texto:'This is ___ pencil. (It belongs to me.)', opciones:['by','my','why','fly'], correcta:1 },
+      { texto:'___ you like ice cream?', opciones:['Go','So','Do','No'], correcta:2 },
+      { texto:'The cat is ___ the table. (It is hiding below it.)', opciones:['after','about','again','under'], correcta:3 },
+      { texto:'We read the book, and ___ we played.', opciones:['then','than','them','they'], correcta:0 }
+    ] } },
+  { materia:'English / ELA', nivel:'Grades 4–6', etiqueta:'Vocabulary Builders · Grades 4–6 · 12 questions',
+    banco:{ titulo:'Vocabulary Builders', preguntas:[
+      { texto:'What does the word "rapid" mean?', opciones:['very slow','very fast','very quiet','very small'], correcta:1 },
+      { texto:'Which word means the OPPOSITE of "ancient"?', opciones:['old','antique','modern','early'], correcta:2 },
+      { texto:'What does the word "enormous" mean?', opciones:['very tiny','very soft','very dark','very big'], correcta:3 },
+      { texto:'A person who is "generous" is someone who…', opciones:['shares happily with others','keeps everything for himself','is always angry','sleeps all day'], correcta:0 },
+      { texto:'What does the word "observe" mean?', opciones:['to forget','to watch carefully','to run fast','to build'], correcta:1 },
+      { texto:'Which word means "to fix something that is broken"?', opciones:['destroy','ignore','repair','paint'], correcta:2 },
+      { texto:'What does the word "brave" mean?', opciones:['very tired','very hungry','confused','not afraid'], correcta:3 },
+      { texto:'In "The scientist made a discovery", a discovery is…', opciones:['something new that is found','a kind of machine','a test','a notebook'], correcta:0 },
+      { texto:'What does the word "arrive" mean?', opciones:['to leave','to get to a place','to wait','to carry'], correcta:1 },
+      { texto:'Which word is a synonym (means the same) as "happy"?', opciones:['gloomy','furious','joyful','nervous'], correcta:2 },
+      { texto:'What does the word "protect" mean?', opciones:['to harm','to hide forever','to chase','to keep safe'], correcta:3 },
+      { texto:'If a story is "mysterious", it is…', opciones:['full of secrets and questions','very funny','easy to understand','only about animals'], correcta:0 }
+    ] } },
+  { materia:'Social Studies', nivel:'Grades 5–8', etiqueta:'US States & Capitals · Grades 5–8 · 12 questions',
+    banco:{ titulo:'US States & Capitals', preguntas:[
+      { texto:'What is the capital of California?', opciones:['Los Angeles','Sacramento','San Francisco','San Diego'], correcta:1 },
+      { texto:'What is the capital of Texas?', opciones:['Houston','Dallas','Austin','San Antonio'], correcta:2 },
+      { texto:'New York City is in which state?', opciones:['New Jersey','Pennsylvania','Connecticut','New York'], correcta:3 },
+      { texto:'What is the capital of Florida?', opciones:['Tallahassee','Miami','Orlando','Tampa'], correcta:0 },
+      { texto:'Which state is known as the "Sunshine State"?', opciones:['Arizona','Florida','California','Hawaii'], correcta:1 },
+      { texto:'What is the capital of Illinois?', opciones:['Chicago','Peoria','Springfield','Rockford'], correcta:2 },
+      { texto:'Which state is the largest by land area?', opciones:['Texas','California','Montana','Alaska'], correcta:3 },
+      { texto:'What is the capital of Colorado?', opciones:['Denver','Boulder','Aspen','Colorado Springs'], correcta:0 },
+      { texto:'The Statue of Liberty stands in which state?', opciones:['New Jersey','New York','Pennsylvania','Virginia'], correcta:1 },
+      { texto:'What is the capital of Washington state?', opciones:['Seattle','Spokane','Olympia','Tacoma'], correcta:2 },
+      { texto:'Which state is an island state in the Pacific Ocean?', opciones:['Alaska','Florida','Maine','Hawaii'], correcta:3 },
+      { texto:'What is the capital of the United States?', opciones:['Washington, D.C.','New York City','Philadelphia','Boston'], correcta:0 }
+    ] } },
+  { materia:'Social Studies', nivel:'Grades 6–8', etiqueta:'Map Skills · Grades 6–8 · 12 questions',
+    banco:{ titulo:'Map Skills', preguntas:[
+      { texto:'On a compass rose, the direction at the top is usually…', opciones:['south','north','east','west'], correcta:1 },
+      { texto:'What part of a map explains what the symbols mean?', opciones:['the scale','the title','the legend (map key)','the compass rose'], correcta:2 },
+      { texto:'Lines of latitude run…', opciones:['north to south','diagonally','in circles','east to west'], correcta:3 },
+      { texto:'The equator is located at…', opciones:['0° latitude','90° latitude','0° longitude','180° longitude'], correcta:0 },
+      { texto:'Lines of longitude meet at…', opciones:['the equator','the poles','the oceans','the continents'], correcta:1 },
+      { texto:'A map scale (like "1 inch = 10 miles") helps you find…', opciones:['direction','elevation','real distance','population'], correcta:2 },
+      { texto:'Which ocean is on the East Coast of the United States?', opciones:['Pacific Ocean','Indian Ocean','Arctic Ocean','Atlantic Ocean'], correcta:3 },
+      { texto:'The Prime Meridian is located at…', opciones:['0° longitude','0° latitude','90° longitude','180° latitude'], correcta:0 },
+      { texto:'What does a political map show?', opciones:['rainfall','countries, states, and cities','mountains only','animal habitats'], correcta:1 },
+      { texto:'If you travel from New York to California, you generally travel…', opciones:['east','north','west','south'], correcta:2 },
+      { texto:'On a map, a star symbol usually marks…', opciones:['a river','a mountain','a desert','a capital city'], correcta:3 },
+      { texto:'The imaginary line that divides Earth into the Northern and Southern Hemispheres is…', opciones:['the equator','the Prime Meridian','the Tropic of Cancer','the International Date Line'], correcta:0 }
+    ] } }
+];
+
+/* === GENERACIÓN DESDE FOTO (texto OCR -> preguntas) — lógica pura ===
+   La foto la lee Tesseract.js en el navegador (carga perezosa, ver la
+   interfaz); aquí solo entra el TEXTO leído y salen preguntas borrador. */
+function barajar(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+const PALABRAS_VACIAS = {};
+('el la los las un una unos unas de del en y o que es son se su sus al lo como mas más pero por para con sin sobre tambien también este esta esto estos estas ese esa eso mi tu nos les le me te muy ya no si sí cuando donde hay ser estar tiene tienen puede pueden hace han fue eran era entre hasta desde luego otro otra otros otras nuestro nuestra durante porque pues bien mal solo sola solos solas cada tanto tanta vez veces cosa cosas ' +
+ 'the a an and or of to in is are was were be been it its this that these those with for on at by from as has have had can will would not but they them their you your we our he she his her than then so if when where which who what how all any each other some more most many much into over under about there here very just also only own same too').split(' ')
+  .forEach(function(w){ PALABRAS_VACIAS[w] = true; });
+/* Lista de vocabulario en el texto: líneas «término – definición»,
+   «término: definición», «término = definición» (EN–ES o palabra–significado) */
+function extraerVocabulario(texto){
+  const pares = [], vistos = {}, vistosDef = {};
+  String(texto || '').split(/\n+/).forEach(function(lineaCruda){
+    const linea = lineaCruda.replace(/^\s*(?:\d{1,2}\s*[.)]|•|·|\*)\s+/, '').trim();
+    if (linea.length < 4) return;
+    if (linea.indexOf('___') >= 0) return;              /* línea de rellenar, no vocabulario */
+    if (/https?:|www\./i.test(linea)) return;           /* pies con enlaces */
+    const m = linea.match(/^(.{1,32}?)\s*(\t|–|—|=|:|\s-\s)\s*(.{2,120})$/);
+    if (!m) return;
+    const termino = m[1].trim();
+    const def = m[3].trim().replace(/[.\s]+$/, '');
+    if (!termino || !def) return;
+    if (/[.?!]/.test(termino)) return;                  /* era una oración, no un par */
+    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(termino)) return; /* un número suelto no es término */
+    if (termino.indexOf('/') >= 0 || termino.indexOf('|') >= 0) return; /* títulos bilingües «X / Y» */
+    if (def.indexOf(':') >= 0) return;                  /* la definición trae otra lista adentro (claves, horarios) */
+    if (/^\d+\s*[-–—=]/.test(def)) return;              /* clave de respuestas «1-b, 2-a…» */
+    if (/^(parte|part|p[aá]gina|page|secci[oó]n|section|cap[ií]tulo|chapter|d[ií]a|day|lecci[oó]n|lesson)\s*\d/i.test(termino)) return; /* encabezados */
+    if (m[2] === '—' && termino.split(/\s+/).length >= 4) return; /* título con raya larga, no término */
+    if (def.indexOf('=') >= 0) return;                  /* claves de respuestas con órdenes */
+    if (termino.indexOf('→') >= 0 || def.indexOf('→') >= 0) return; /* ejemplos con flechas */
+    if (def.indexOf(';') >= 0 && def.indexOf(':') >= 0) return;     /* claves en lista, no definición */
+    if (/^(c[óo]mo|qu[ée]|cu[áa]ndo|d[óo]nde|how|what|when|where|why|which|who)\b/i.test(termino)) return; /* renglón de instrucción */
+    if (/^(ejemplo|example|nota|note|recuerda|remember|ojo|importante|important|instrucciones|instructions|atenci[óo]n|aviso)$/i.test(termino.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, ''))) return; /* rótulos */
+    const esGrito = function(s){ return s.split(/\s+/).length >= 2 && /[A-ZÁÉÍÓÚÜÑ]/.test(s) && s === s.toUpperCase(); };
+    if (esGrito(termino) || esGrito(def)) return;       /* encabezados en mayúsculas */
+    if (termino.split(/\s+/).length > 5) return;
+    const clave = termino.toLowerCase(), claveDef = def.toLowerCase();
+    if (vistos[clave] || vistosDef[claveDef]) return;   /* sin términos ni significados repetidos */
+    vistos[clave] = true; vistosDef[claveDef] = true;
+    pares.push({ termino: termino, def: def });
+  });
+  return pares;
+}
+function preguntasDeVocabulario(pares){
+  const preguntas = [];
+  pares.forEach(function(par, i){
+    const otras = [];
+    pares.forEach(function(p2, j){
+      if (j !== i && p2.def.toLowerCase() !== par.def.toLowerCase() && otras.indexOf(p2.def) < 0) otras.push(p2.def);
+    });
+    if (otras.length < 3) return;
+    const opciones = barajar([par.def].concat(barajar(otras).slice(0, 3)));
+    preguntas.push({ texto:'¿Qué significa «' + par.termino + '»?',
+                     opciones: opciones, correcta: opciones.indexOf(par.def) });
+  });
+  return preguntas;
+}
+/* Bolsa de palabras de contenido (≥5 letras, sin vacías) de todo el texto */
+function palabrasContenidoDe(texto){
+  const bolsa = [], vistos = {};
+  (String(texto || '').match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{5,}/g) || []).forEach(function(w){
+    const lw = w.toLowerCase();
+    if (PALABRAS_VACIAS[lw] || vistos[lw]) return;
+    vistos[lw] = true; bolsa.push(w);
+  });
+  return bolsa;
+}
+/* Cloze: tapa la palabra de contenido más larga de cada oración y ofrece
+   3 distractores tomados de OTRAS palabras de contenido del mismo texto */
+function preguntasDeCompletar(texto){
+  const preguntas = [];
+  const bolsa = palabrasContenidoDe(texto);
+  if (bolsa.length < 4) return preguntas;
+  const oraciones = String(texto || '').replace(/\r/g, '').split(/\n+/)
+    .reduce(function(acc, linea){
+      return acc.concat(linea.replace(/([.!?])\s+/g, '$1\u0001').split('\u0001'));
+    }, [])
+    .map(function(s){ return s.trim(); })
+    .filter(function(s){
+      if (s.length < 25 || s.length > 220) return false;
+      if (s.indexOf('•') >= 0) return false;            /* encabezados y bancos de palabras */
+      const letras = s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');
+      const mayus = s.replace(/[^A-ZÁÉÍÓÚÜÑ]/g, '');
+      if (letras.length && mayus.length / letras.length > 0.7) return false; /* títulos en mayúsculas */
+      return true;
+    });
+  const usadas = {};
+  /* Primero las oraciones completas (terminan en . ! ?): son la lectura de
+     verdad; los renglones sueltos (títulos, instrucciones) van después */
+  const ordenadas = oraciones.filter(function(s){ return /[.!?]$/.test(s); })
+    .concat(oraciones.filter(function(s){ return !/[.!?]$/.test(s); }));
+  ordenadas.forEach(function(oracion){
+    if (preguntas.length >= 15) return;
+    const tokens = oracion.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{5,}/g) || [];
+    let elegida = null;
+    tokens.forEach(function(tok){
+      if (oracion.indexOf(tok) === 0) return;          /* no la primera palabra (mayúscula inicial) */
+      if (PALABRAS_VACIAS[tok.toLowerCase()]) return;
+      if (usadas[tok.toLowerCase()]) return;
+      if (!elegida || tok.length > elegida.length) elegida = tok;
+    });
+    if (!elegida) return;
+    const mismaCaja = function(w){ return (w === w.toLowerCase()) === (elegida === elegida.toLowerCase()); };
+    const distractores = barajar(bolsa.filter(function(w){
+      return w.toLowerCase() !== elegida.toLowerCase() && !usadas[w.toLowerCase()] &&
+             Math.abs(w.length - elegida.length) <= 4 && mismaCaja(w);
+    })).slice(0, 3);
+    if (distractores.length < 3) return;
+    const escapada = elegida.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('(^|[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(' + escapada + ')(?![A-Za-zÁÉÍÓÚÜÑáéíóúüñ])');
+    const textoPregunta = oracion.replace(re, '$1________');
+    if (textoPregunta === oracion) return;
+    usadas[elegida.toLowerCase()] = true;
+    const opciones = barajar([elegida].concat(distractores));
+    preguntas.push({ texto:'Completa la oración de tu lección: «' + textoPregunta + '»',
+                     opciones: opciones, correcta: opciones.indexOf(elegida) });
+  });
+  return preguntas;
+}
+/* Genera hasta 15: primero el vocabulario de la página, luego completar */
+function generarDesdeTexto(texto){
+  let preguntas = [];
+  const pares = extraerVocabulario(texto);
+  if (pares.length >= 4) preguntas = preguntasDeVocabulario(pares);
+  if (preguntas.length < 15){
+    const cloze = preguntasDeCompletar(texto);
+    for (let i = 0; i < cloze.length && preguntas.length < 15; i++) preguntas.push(cloze[i]);
+  }
+  return preguntas.slice(0, 15);
+}
 
 function b64encodeUtf8(s){
   return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -657,11 +1009,165 @@ $('btn-add').addEventListener('click', function(){
 });
 $('btn-ejemplo').addEventListener('click', function(){
   banco = JSON.parse(JSON.stringify(BANCO_EJEMPLO));
+  bancoDesdeEnlace = false;
   $('banco-titulo').value = banco.titulo;
+  $('aviso-borrador').classList.add('oculto');
   guardarBanco(); pintarConstructor();
   $('msg-constructor').className = 'mensaje bien';
   $('msg-constructor').textContent = '🐾 Banco de ejemplo cargado: «Los Animales», 10 preguntas. Puedes editarlo o jugar ya.';
 });
+/* ================= BANCOS LISTOS ================= */
+function pintarBancosListos(){
+  const sel = $('sel-bancos');
+  sel.innerHTML = '';
+  const materias = [];
+  BANCOS_LISTOS.forEach(function(item){ if (materias.indexOf(item.materia) < 0) materias.push(item.materia); });
+  materias.forEach(function(materia){
+    const grupo = document.createElement('optgroup');
+    grupo.label = materia;
+    BANCOS_LISTOS.forEach(function(item, i){
+      if (item.materia !== materia) return;
+      const op = document.createElement('option');
+      op.value = i;
+      op.textContent = item.etiqueta;
+      grupo.appendChild(op);
+    });
+    sel.appendChild(grupo);
+  });
+  actualizarInfoBancoListo();
+}
+function actualizarInfoBancoListo(){
+  const item = BANCOS_LISTOS[parseInt($('sel-bancos').value, 10)];
+  if (!item) return;
+  $('info-banco-listo').innerHTML = '«<b>' + escaparHtml(item.banco.titulo) + '</b>» · ' +
+    escaparHtml(item.nivel) + ' · <b>' + item.banco.preguntas.length + '</b> preguntas listas pa’ jugar.';
+}
+function cargarBancoListo(jugar){
+  const item = BANCOS_LISTOS[parseInt($('sel-bancos').value, 10)];
+  if (!item) return;
+  banco = JSON.parse(JSON.stringify(item.banco));
+  bancoDesdeEnlace = false;
+  $('banco-titulo').value = banco.titulo;
+  $('aviso-borrador').classList.add('oculto');
+  guardarBanco(); pintarConstructor();
+  if (jugar){
+    if (sincronizarBanco(true)) mostrarVista('juego');
+  } else {
+    $('msg-constructor').className = 'mensaje bien';
+    $('msg-constructor').textContent = '📚 Banco listo cargado en el editor: «' + banco.titulo + '» (' +
+      banco.preguntas.length + ' preguntas). Edítalo si quieres o pulsa «Jugar con mi banco».';
+  }
+}
+$('sel-bancos').addEventListener('change', actualizarInfoBancoListo);
+$('btn-listo-editar').addEventListener('click', function(){ cargarBancoListo(false); });
+$('btn-listo-jugar').addEventListener('click', function(){ cargarBancoListo(true); });
+pintarBancosListos();
+
+/* ================= FOTO DE LA LECCIÓN (OCR perezoso) ================= */
+let fotoArchivo = null;
+let tesseractCarga = null;
+function ponerProgresoFoto(pct, texto){
+  $('foto-progreso-relleno').style.width = Math.max(0, Math.min(100, pct)) + '%';
+  $('foto-progreso-texto').textContent = texto;
+}
+/* Tesseract.js se descarga SOLO cuando el maestro toca esta función;
+   la página base no hace ninguna llamada de red. */
+function cargarTesseract(){
+  if (window.Tesseract) return Promise.resolve();
+  if (tesseractCarga) return tesseractCarga;
+  tesseractCarga = new Promise(function(resolve, reject){
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = function(){ resolve(); };
+    s.onerror = function(){ reject(new Error('No se pudo descargar la herramienta de lectura. Revisa tu conexión a internet y vuelve a intentarlo.')); };
+    document.head.appendChild(s);
+  });
+  return tesseractCarga;
+}
+function ocrDeImagen(img, alProgreso){
+  const logger = function(m){
+    if (!alProgreso) return;
+    if (m && m.status === 'recognizing text'){
+      alProgreso(15 + Math.round((m.progress || 0) * 85), 'Leyendo tu foto… ' + Math.round((m.progress || 0) * 100) + '%');
+    } else {
+      alProgreso(10, 'Preparando la herramienta de lectura…');
+    }
+  };
+  if (window.Tesseract && typeof window.Tesseract.createWorker === 'function'){
+    return window.Tesseract.createWorker('eng+spa', 1, { logger: logger }).then(function(worker){
+      return worker.recognize(img).then(function(res){
+        const texto = res && res.data ? res.data.text : '';
+        try { if (worker.terminate) worker.terminate(); } catch(e){}
+        return texto;
+      }, function(err){
+        try { if (worker.terminate) worker.terminate(); } catch(e){}
+        throw err;
+      });
+    });
+  }
+  if (window.Tesseract && typeof window.Tesseract.recognize === 'function'){
+    return window.Tesseract.recognize(img, 'eng+spa', { logger: logger }).then(function(res){
+      return res && res.data ? res.data.text : '';
+    });
+  }
+  return Promise.reject(new Error('La herramienta de lectura no cargó bien. Recarga la página e inténtalo otra vez.'));
+}
+$('foto-input').addEventListener('change', function(){
+  fotoArchivo = this.files && this.files[0] ? this.files[0] : null;
+  if (fotoArchivo){
+    try {
+      $('foto-preview').src = URL.createObjectURL(fotoArchivo);
+      $('foto-preview').classList.remove('oculto');
+    } catch(e){}
+    $('msg-foto').textContent = '';
+  } else {
+    $('foto-preview').classList.add('oculto');
+  }
+});
+$('btn-foto').addEventListener('click', function(){
+  const msg = $('msg-foto');
+  if (!fotoArchivo){
+    msg.className = 'mensaje error';
+    msg.textContent = '📸 Primero escoge o saca la foto de la página de tu lección.';
+    return;
+  }
+  const btn = $('btn-foto');
+  btn.disabled = true;
+  msg.textContent = '';
+  $('foto-progreso').classList.remove('oculto');
+  ponerProgresoFoto(3, 'Descargando la herramienta de lectura (solo la primera vez)…');
+  cargarTesseract()
+    .then(function(){ return ocrDeImagen(fotoArchivo, ponerProgresoFoto); })
+    .then(function(texto){
+      ponerProgresoFoto(100, 'Lectura terminada. Generando preguntas…');
+      const generadas = generarDesdeTexto(texto || '');
+      if (!generadas.length){
+        msg.className = 'mensaje error';
+        msg.textContent = '😕 No pude leer suficiente texto de esa foto pa’ generar preguntas. Prueba con una foto más cerca, derecha y con buena luz, donde se vea bien la página completa.';
+        return;
+      }
+      banco = { titulo:'Mi lección — de una foto (borrador)', preguntas: generadas };
+      bancoDesdeEnlace = false;
+      $('banco-titulo').value = banco.titulo;
+      guardarBanco(); pintarConstructor();
+      $('aviso-borrador').classList.remove('oculto');
+      msg.className = 'mensaje bien';
+      msg.textContent = '📸 Generé ' + generadas.length + ' pregunta' + (generadas.length > 1 ? 's' : '') +
+        ' de tu foto y las puse en el editor, arriba.' +
+        (generadas.length < 5 ? ' Son menos de 5: añade o edita en el editor hasta completar el mínimo pa’ jugar.' :
+          ' Revísalas en el editor y corrige lo que sea antes de jugar.');
+      $('vista-constructor').scrollIntoView({ behavior:'smooth' });
+    })
+    .catch(function(err){
+      msg.className = 'mensaje error';
+      msg.textContent = '😕 No pude leer la foto. ' + (err && err.message ? err.message : 'Prueba con una foto más cerca, derecha y con buena luz.');
+    })
+    .then(function(){
+      btn.disabled = false;
+      setTimeout(function(){ $('foto-progreso').classList.add('oculto'); }, 1500);
+    });
+});
+
 $('btn-jugar-constructor').addEventListener('click', function(){
   if (sincronizarBanco(true)) mostrarVista('juego');
 });
