@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección interactiva · Los Animales — Teachfolio</title>
+<style>
+  :root{
+    --verde:#0f2c24; --verde2:#173f35; --verde3:#1e4d3f;
+    --dorado:#c9a227; --dorado2:#e7c65a; --crema:#f5efe0; --papel:#fdfaf2;
+    --ok:#2e7d4f; --okbg:#e2f2e6; --mal:#b3372f; --malbg:#fbe7e4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--verde);color:var(--crema);
+    font-family:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif;line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+  header{border-bottom:3px double var(--dorado);padding:14px 0 12px;text-align:center}
+  .marca{font-family:"Playfair Display",Georgia,"Times New Roman",serif;letter-spacing:.14em;
+    font-size:.8rem;color:var(--dorado2);text-transform:uppercase}
+  h1{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-weight:700;
+    font-size:1.9rem;margin:.25em 0 .1em;color:#fff}
+  .sub{color:var(--dorado2);font-style:italic;margin:0}
+  .tarjeta{background:var(--papel);color:#21312b;border-radius:10px;padding:20px 22px;
+    margin-top:22px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+  .tarjeta h2{font-family:"Playfair Display",Georgia,serif;color:var(--verde2);margin:.1em 0 .4em;font-size:1.25rem}
+  label.nombre{display:block;font-weight:600;margin-bottom:6px}
+  input[type="text"]{width:100%;padding:11px 12px;font-size:1.05rem;border:2px solid var(--verde3);
+    border-radius:8px;background:#fff;color:#21312b}
+  .pregunta{border-top:1px solid #ddd3b8;padding:16px 0 6px}
+  .pregunta:first-of-type{border-top:none}
+  .p-num{display:inline-block;background:var(--verde2);color:var(--dorado2);font-weight:700;
+    border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;margin-right:8px}
+  .p-texto{font-weight:700;font-size:1.08rem}
+  .p-apoyo{color:#6b6350;font-size:.92rem;font-style:italic;margin:2px 0 8px 36px}
+  .opciones{margin:6px 0 8px 36px}
+  .opciones label{display:block;padding:8px 10px;border:1px solid #e0d7bd;border-radius:8px;
+    margin-bottom:6px;cursor:pointer;background:#fff}
+  .opciones label:hover{border-color:var(--dorado)}
+  .opciones input{margin-right:8px;accent-color:var(--verde2)}
+  select.pareo{margin:4px 0 8px 36px;padding:9px 10px;font-size:1rem;border:2px solid var(--verde3);
+    border-radius:8px;background:#fff;color:#21312b;max-width:100%}
+  .btn{display:inline-block;border:none;cursor:pointer;border-radius:8px;font-weight:700;
+    font-size:1.05rem;padding:13px 22px;background:var(--dorado);color:var(--verde);width:100%}
+  .btn:hover{background:var(--dorado2)}
+  .btn.verde{background:var(--verde2);color:var(--crema)}
+  .btn.whatsapp{background:#1f9d55;color:#fff}
+  .btn:disabled{opacity:.55;cursor:default}
+  .acciones{display:grid;gap:10px;margin-top:14px}
+  #resultado{display:none}
+  .puntaje{font-family:"Playfair Display",Georgia,serif;font-size:2.4rem;color:var(--verde2);text-align:center;margin:.1em 0}
+  .puntaje small{display:block;font-family:"Source Sans 3",sans-serif;font-size:1rem;color:#6b6350}
+  .mensaje-nivel{text-align:center;font-size:1.1rem;font-weight:600;margin:4px 0 10px}
+  .revision{margin-top:10px}
+  .rev{border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:.98rem}
+  .rev.bien{background:var(--okbg);border-left:6px solid var(--ok)}
+  .rev.mal{background:var(--malbg);border-left:6px solid var(--mal)}
+  .rev .r-titulo{font-weight:700}
+  .rev .r-correcta{display:block;margin-top:2px}
+  textarea#codigo{width:100%;min-height:64px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:.85rem;padding:10px;border:2px dashed var(--dorado);border-radius:8px;background:#fffdf4;color:#21312b;word-break:break-all}
+  .aviso{font-size:.9rem;color:#6b6350}
+  .oculto{display:none}
+  footer{text-align:center;color:#9db8ac;font-size:.85rem;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="marca">Teachfolio · Lección interactiva</div>
+    <h1>Los Animales</h1>
+    <p class="sub">Vocabulario en español · Nivel elemental</p>
+  </header>
+
+  <!-- PASO 1 · NOMBRE -->
+  <section class="tarjeta" id="paso-nombre">
+    <h2>¡Hola! Antes de empezar…</h2>
+    <label class="nombre" for="nombre">Escribe tu nombre <span class="aviso">(Write your name)</span></label>
+    <input type="text" id="nombre" autocomplete="name" placeholder="Ej.: Ana María">
+    <div class="acciones">
+      <button class="btn" id="btn-empezar">Empezar la lección →</button>
+    </div>
+    <p class="aviso">Son 10 preguntas. Al terminar, la lección se corrige sola. ¡Suerte! <i>(10 questions — the lesson grades itself when you finish.)</i></p>
+  </section>
+
+  <!-- PASO 2 · PREGUNTAS -->
+  <section class="tarjeta oculto" id="paso-preguntas">
+    <h2 id="saludo">Contesta cada pregunta</h2>
+    <div id="contenedor-preguntas"></div>
+    <div class="acciones">
+      <button class="btn verde" id="btn-terminar">Terminar y ver mi resultado ✓</button>
+    </div>
+    <p class="aviso" id="aviso-faltan"></p>
+  </section>
+
+  <!-- PASO 3 · RESULTADO -->
+  <section class="tarjeta" id="resultado">
+    <h2>Tu resultado</h2>
+    <div class="puntaje"><span id="puntaje-num">–</span><small id="puntaje-pct"></small></div>
+    <p class="mensaje-nivel" id="mensaje-nivel"></p>
+    <div class="revision" id="revision"></div>
+
+    <h2 style="margin-top:22px">Envía tu resultado al maestro</h2>
+    <p class="aviso">Este es tu <b>código de resultado</b>. Cópialo y pégalo donde tu maestro te diga, o envíalo directo por WhatsApp:</p>
+    <textarea id="codigo" readonly></textarea>
+    <div class="acciones">
+      <button class="btn" id="btn-copiar">📋 Copiar mi código</button>
+      <button class="btn whatsapp" id="btn-whatsapp">Enviar por WhatsApp</button>
+    </div>
+    <p class="aviso" id="copiado"></p>
+  </section>
+
+  <footer>Lección autocorregible de muestra · Teachfolio — recursos de maestros, para maestros</footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — número de WhatsApp del maestro que recibe
+   los resultados. En producción, cada enlace de lección
+   llevaría el número (o el canal) del maestro dueño de la clase.
+   ============================================================ */
+const WHATSAPP_MAESTRO = '12406590154';
+
+/* === Almacenamiento seguro: localStorage con respaldo en memoria === */
+const memoria = {};
+const store = {
+  get(k){ try { return window.localStorage.getItem(k); }
+          catch(e){ return (k in memoria) ? memoria[k] : null; } },
+  set(k,v){ try { window.localStorage.setItem(k,v); }
+            catch(e){ memoria[k] = v; } }
+};
+
+/* === LOGICA PURA (corrección + código de resultado) === */
+const BANCO = [
+  { tipo:'mc',    texto:'¿Cómo se dice «dog» en español?', apoyo:'How do you say “dog” in Spanish?',
+    opciones:['el gato','el perro','el pájaro','el pez'], correcta:1, tema:'Vocabulario: el perro' },
+  { tipo:'mc',    texto:'¿Qué animal hace «miau»?', apoyo:'Which animal says “meow”?',
+    opciones:['el perro','la vaca','el gato','el pato'], correcta:2, tema:'Los sonidos de los animales' },
+  { tipo:'vf',    texto:'El elefante es un animal muy pequeño.', apoyo:'True or false?',
+    opciones:['Cierto','Falso'], correcta:1, tema:'Comprensión: el tamaño de los animales' },
+  { tipo:'mc',    texto:'¿Cómo se dice «bird» en español?', apoyo:'How do you say “bird” in Spanish?',
+    opciones:['el pez','el pájaro','la rana','el caballo'], correcta:1, tema:'Vocabulario: el pájaro' },
+  { tipo:'pareo', texto:'La vaca nos da…', apoyo:'The cow gives us…',
+    opciones:['miel','leche','huevos','lana'], correcta:1, tema:'Los animales de la granja' },
+  { tipo:'mc',    texto:'¿Qué animal vive en el agua?', apoyo:'Which animal lives in the water?',
+    opciones:['el pez','el gato','el caballo','el pájaro'], correcta:0, tema:'Dónde viven los animales' },
+  { tipo:'vf',    texto:'El caballo puede correr muy rápido.', apoyo:'True or false?',
+    opciones:['Cierto','Falso'], correcta:0, tema:'Comprensión: lo que hacen los animales' },
+  { tipo:'mc',    texto:'¿Cuál de estos animales es el más grande?', apoyo:'Which of these animals is the biggest?',
+    opciones:['la hormiga','el ratón','la mariposa','la ballena'], correcta:3, tema:'Comparar tamaños' },
+  { tipo:'pareo', texto:'El animal que hace la miel es…', apoyo:'The animal that makes honey is…',
+    opciones:['la gallina','la abeja','la oveja','la cabra'], correcta:1, tema:'Los animales y lo que producen' },
+  { tipo:'mc',    texto:'¿Cómo se dice «horse» en español?', apoyo:'How do you say “horse” in Spanish?',
+    opciones:['el toro','la vaca','el caballo','el cerdo'], correcta:2, tema:'Vocabulario: el caballo' }
+];
+
+function corregir(respuestas){           // respuestas: array de índices elegidos (o -1)
+  return BANCO.map(function(p,i){ return respuestas[i] === p.correcta ? 1 : 0; });
+}
+function codificarResultado(nombre, bits){
+  const payload = JSON.stringify({ n:nombre, r:bits.join('') });
+  let b64 = btoa(unescape(encodeURIComponent(payload)));
+  return 'TF1-' + b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function mensajeNivel(pct){
+  if (pct >= 90) return '¡Excelente! 🌟 Dominas este vocabulario.';
+  if (pct >= 70) return '¡Muy bien! 👏 Casi lo tienes todo.';
+  if (pct >= 50) return 'Bien hecho. Sigue practicando y llegarás más lejos. 💪';
+  return 'Buen intento. Repasa la lista de animales y vuelve a intentarlo. 📚';
+}
+/* === FIN LOGICA PURA === */
+
+/* === Interfaz === */
+const $ = function(id){ return document.getElementById(id); };
+let nombreEstudiante = '';
+
+function pintarPreguntas(){
+  const cont = $('contenedor-preguntas');
+  cont.innerHTML = '';
+  BANCO.forEach(function(p, i){
+    const div = document.createElement('div');
+    div.className = 'pregunta';
+    let html = '<span class="p-num">' + (i+1) + '</span><span class="p-texto">' + p.texto + '</span>' +
+               '<div class="p-apoyo">' + p.apoyo + '</div>';
+    if (p.tipo === 'pareo'){
+      html += '<select class="pareo" id="resp-' + i + '"><option value="-1">— Elige la respuesta —</option>' +
+              p.opciones.map(function(op,j){ return '<option value="' + j + '">' + op + '</option>'; }).join('') +
+              '</select>';
+    } else {
+      html += '<div class="opciones">' + p.opciones.map(function(op,j){
+        return '<label><input type="radio" name="resp-' + i + '" value="' + j + '"> ' + op + '</label>';
+      }).join('') + '</div>';
+    }
+    div.innerHTML = html;
+    cont.appendChild(div);
+  });
+}
+function leerRespuestas(){
+  return BANCO.map(function(p, i){
+    if (p.tipo === 'pareo'){
+      const s = $('resp-' + i);
+      return s ? parseInt(s.value, 10) : -1;
+    }
+    const elegido = document.querySelector('input[name="resp-' + i + '"]:checked');
+    return elegido ? parseInt(elegido.value, 10) : -1;
+  });
+}
+
+$('btn-empezar').addEventListener('click', function(){
+  nombreEstudiante = $('nombre').value.trim();
+  if (!nombreEstudiante){ $('nombre').focus(); $('nombre').placeholder = 'Escribe tu nombre primero 🙂'; return; }
+  store.set('tf-nombre', nombreEstudiante);
+  $('saludo').textContent = '¡Hola, ' + nombreEstudiante + '! Contesta cada pregunta';
+  $('paso-nombre').classList.add('oculto');
+  $('paso-preguntas').classList.remove('oculto');
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+$('btn-terminar').addEventListener('click', function(){
+  const respuestas = leerRespuestas();
+  const faltan = respuestas.filter(function(r){ return r === -1; }).length;
+  if (faltan > 0){
+    $('aviso-faltan').textContent = 'Te faltan ' + faltan + ' pregunta(s) por contestar. Respóndelas todas para ver tu resultado.';
+    return;
+  }
+  $('aviso-faltan').textContent = '';
+  const bits = corregir(respuestas);
+  const aciertos = bits.reduce(function(a,b){ return a+b; }, 0);
+  const pct = Math.round(aciertos / BANCO.length * 100);
+  $('puntaje-num').textContent = aciertos + ' / ' + BANCO.length;
+  $('puntaje-pct').textContent = 'Puntaje: ' + pct + '%';
+  $('mensaje-nivel').textContent = mensajeNivel(pct);
+  const rev = $('revision');
+  rev.innerHTML = '';
+  BANCO.forEach(function(p, i){
+    const bien = bits[i] === 1;
+    const div = document.createElement('div');
+    div.className = 'rev ' + (bien ? 'bien' : 'mal');
+    let html = '<span class="r-titulo">' + (bien ? '✓' : '✗') + ' Pregunta ' + (i+1) + '.</span> ' + p.texto +
+               '<span class="r-correcta">Tu respuesta: <b>' + p.opciones[respuestas[i]] + '</b></span>';
+    if (!bien){
+      html += '<span class="r-correcta">Respuesta correcta: <b>' + p.opciones[p.correcta] + '</b></span>';
+    }
+    div.innerHTML = html;
+    rev.appendChild(div);
+  });
+  $('codigo').value = codificarResultado(nombreEstudiante, bits);
+  $('paso-preguntas').classList.add('oculto');
+  $('resultado').style.display = 'block';
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+$('btn-copiar').addEventListener('click', function(){
+  const area = $('codigo');
+  area.select(); area.setSelectionRange(0, area.value.length);
+  function hecho(){ $('copiado').textContent = '¡Código copiado! Pégalo donde tu maestro te diga. ✓'; }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(area.value).then(hecho, function(){
+      try { document.execCommand('copy'); hecho(); } catch(e){ $('copiado').textContent = 'Mantén presionado el código y cópialo manualmente.'; }
+    });
+  } else {
+    try { document.execCommand('copy'); hecho(); } catch(e){ $('copiado').textContent = 'Mantén presionado el código y cópialo manualmente.'; }
+  }
+});
+
+$('btn-whatsapp').addEventListener('click', function(){
+  const texto = 'Hola, maestro/a. Soy ' + nombreEstudiante + '. Terminé la lección «Los Animales» y este es mi código de resultado: ' + $('codigo').value;
+  window.open('https://wa.me/' + WHATSAPP_MAESTRO + '?text=' + encodeURIComponent(texto), '_blank');
+});
+
+/* Nombre recordado (almacenamiento seguro) */
+(function(){
+  const previo = store.get('tf-nombre');
+  if (previo) $('nombre').value = previo;
+})();
+pintarPreguntas();
+</script>
+</body>
+</html>
