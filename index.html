@@ -689,9 +689,6 @@ footer{background:var(--chalk);color:var(--paper);padding:38px 0 30px;border-top
     document.getElementById('filterToggle').addEventListener('click', function(){
       document.getElementById('filters').classList.toggle('open');
     });
-    Array.prototype.forEach.call(document.querySelectorAll('a[data-payhip]'), function(a){
-      a.addEventListener('click', function(ev){ ev.preventDefault(); });
-    });
     apply();
   } catch(e){}
 })();
