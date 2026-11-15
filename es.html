@@ -565,9 +565,9 @@ footer{background:var(--chalk);color:var(--paper);padding:38px 0 30px;border-top
         </select>
       </div>
       <button class="btn" type="submit" style="width:100%;cursor:pointer;font-family:var(--sans)">Registrarme como Maestro Fundador</button>
-      <p class="form-note">Al enviar se abre WhatsApp con tu registro ya escrito &mdash; solo pulsa enviar all&iacute; para completarlo. Tu Kit Gratis te llega despu&eacute;s del registro.</p>
+      <p class="form-note">Al enviar se abre tu correo con tu registro ya escrito &mdash; solo pulsa enviar all&iacute; para completarlo. Tu Kit Gratis te llega despu&eacute;s del registro.</p>
     </form>
-    <div class="confirm" id="confirmBox"><b>&iexcl;Ya casi est&aacute;s dentro!</b><br>WhatsApp se abri&oacute; con tu registro &mdash; pulsa <b>Enviar</b> all&iacute; para terminar. Tu plaza de Fundador queda apartada y el Kit Gratis para Maestros de Espa&ntilde;ol te llega tras tu registro.</div>
+    <div class="confirm" id="confirmBox"><b>&iexcl;Ya casi est&aacute;s dentro!</b><br>Tu correo se abri&oacute; con tu registro &mdash; pulsa <b>Enviar</b> all&iacute; para terminar. Tu plaza de Fundador queda apartada y el Kit Gratis para Maestros de Espa&ntilde;ol te llega tras tu registro.</div>
   </div>
 </section>
 
@@ -629,7 +629,7 @@ footer{background:var(--chalk);color:var(--paper);padding:38px 0 30px;border-top
       'Idioma de sus recursos: ' + lang,
       'Quiero recibir el Kit Gratis para Maestros de Espa\u00f1ol.'
     ];
-    var url = 'https://wa.me/12406590154?text=' + encodeURIComponent(lines.join('\n'));
+    var url = 'mailto:swingbravo@gmail.com?subject=' + encodeURIComponent('Teachfolio \u2014 Registro de Maestro Fundador') + '&body=' + encodeURIComponent(lines.join('\n'));
     window.open(url, '_blank');
     var box = document.getElementById('confirmBox');
     box.style.display = 'block';

@@ -565,9 +565,9 @@ footer{background:var(--chalk);color:var(--paper);padding:38px 0 30px;border-top
         </select>
       </div>
       <button class="btn" type="submit" style="width:100%;cursor:pointer;font-family:var(--sans)">Register as a Founding Teacher</button>
-      <p class="form-note">Submitting opens WhatsApp with your registration already written &mdash; just press send there to complete it. Your Starter Kit is sent after you register.</p>
+      <p class="form-note">Submitting opens your email app with your registration already written &mdash; just press send there to complete it. Your Starter Kit is sent after you register.</p>
     </form>
-    <div class="confirm" id="confirmBox"><b>You&rsquo;re almost in!</b><br>WhatsApp opened with your registration &mdash; press <b>Send</b> there to finish. Your founding spot is held for you, and the Free Spanish Teacher Starter Kit follows after your registration.</div>
+    <div class="confirm" id="confirmBox"><b>You&rsquo;re almost in!</b><br>Your email app opened with your registration &mdash; press <b>Send</b> there to finish. Your founding spot is held for you, and the Free Spanish Teacher Starter Kit follows after your registration.</div>
   </div>
 </section>
 
@@ -629,7 +629,7 @@ footer{background:var(--chalk);color:var(--paper);padding:38px 0 30px;border-top
       'Resource language: ' + lang,
       'Please send me the Free Spanish Teacher Starter Kit.'
     ];
-    var url = 'https://wa.me/12406590154?text=' + encodeURIComponent(lines.join('\n'));
+    var url = 'mailto:swingbravo@gmail.com?subject=' + encodeURIComponent('Teachfolio \u2014 Founding Teacher registration') + '&body=' + encodeURIComponent(lines.join('\n'));
     window.open(url, '_blank');
     var box = document.getElementById('confirmBox');
     box.style.display = 'block';
