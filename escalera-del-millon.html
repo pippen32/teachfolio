@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Escalera del Millón — Juego de concurso para tu clase</title>
+<style>
+  :root{
+    --azul-fondo:#040826; --azul-escenario:#0a1660; --azul-pastilla:#101f7a;
+    --azul-claro:#2743c7; --oro:#f5c542; --oro-claro:#ffe27a; --oro-oscuro:#b8860b;
+    --blanco:#f4f6ff; --verde:#1faa4d; --rojo:#d92b2b; --naranja:#ff8c1a;
+    --gris:#9aa5d8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif; color:var(--blanco);
+    background:
+      radial-gradient(ellipse 90% 55% at 50% -5%, rgba(120,150,255,.35), rgba(0,0,0,0) 60%),
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(245,197,66,.14), rgba(0,0,0,0) 55%),
+      linear-gradient(180deg, var(--azul-escenario) 0%, var(--azul-fondo) 55%, #02041a 100%);
+    background-color:var(--azul-fondo);
+    min-height:100vh; padding:18px 14px 60px;
+  }
+  .envoltura{max-width:1060px; margin:0 auto}
+  header{text-align:center; padding:10px 0 4px}
+  .focos{font-size:15px; letter-spacing:14px; color:var(--oro); text-shadow:0 0 12px var(--oro)}
+  h1{
+    font-family:Georgia,'Times New Roman',serif; font-weight:900; letter-spacing:1px;
+    font-size:clamp(30px,6vw,52px); line-height:1.05; margin:6px 0 2px;
+    background:linear-gradient(180deg,#fff6c9 15%, var(--oro) 55%, var(--oro-oscuro) 90%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    text-shadow:none; filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
+  }
+  .subtitulo{color:var(--gris); font-size:15px; margin-bottom:6px}
+  .subtitulo b{color:var(--oro-claro)}
+
+  nav.pestanas{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:16px 0 20px}
+  nav.pestanas button{
+    font:inherit; font-weight:700; cursor:pointer; color:var(--blanco);
+    background:linear-gradient(180deg,#1a2f9e,#0d1c66); border:2px solid var(--oro-oscuro);
+    border-radius:999px; padding:9px 20px; font-size:15px;
+  }
+  nav.pestanas button.activa{background:linear-gradient(180deg,var(--oro-claro),var(--oro) 60%,var(--oro-oscuro)); color:#241a00; border-color:#ffe98a}
+  nav.pestanas button:hover{filter:brightness(1.15)}
+
+  .vista{display:none}
+  .vista.activa{display:block}
+  .tarjeta{
+    background:linear-gradient(180deg, rgba(23,38,130,.92), rgba(8,16,64,.96));
+    border:2px solid rgba(245,197,66,.55); border-radius:18px; padding:22px;
+    box-shadow:0 10px 34px rgba(0,0,0,.55), inset 0 0 40px rgba(39,67,199,.25);
+  }
+  .tarjeta h2{font-family:Georgia,serif; color:var(--oro-claro); font-size:24px; margin-bottom:8px}
+  .tarjeta h3{color:var(--oro-claro); font-size:18px; margin:16px 0 8px}
+  .ayuda{color:var(--gris); font-size:14px; line-height:1.55; margin-bottom:12px}
+  .ayuda b{color:var(--blanco)}
+  .oculto{display:none !important}
+
+  label.etiqueta{display:block; font-weight:700; color:var(--oro-claro); font-size:14px; margin:14px 0 6px}
+  input[type=text], textarea, select{
+    width:100%; font:inherit; font-size:15px; color:#0a1030; background:#eef1ff;
+    border:2px solid #54679f; border-radius:10px; padding:9px 11px;
+  }
+  textarea{resize:vertical}
+  input[type=text]:focus, textarea:focus{outline:3px solid rgba(245,197,66,.6); border-color:var(--oro)}
+
+  .btn{
+    font:inherit; font-weight:800; cursor:pointer; border-radius:999px; padding:11px 22px;
+    border:2px solid var(--oro-oscuro); font-size:15px;
+    background:linear-gradient(180deg,var(--oro-claro),var(--oro) 55%,var(--oro-oscuro)); color:#241a00;
+    box-shadow:0 4px 14px rgba(0,0,0,.45);
+  }
+  .btn:hover{filter:brightness(1.1)}
+  .btn:disabled{opacity:.45; cursor:not-allowed; filter:grayscale(.4)}
+  .btn.secundario{background:linear-gradient(180deg,#2a41b8,#13236f); color:var(--blanco); border-color:#5f74d6}
+  .btn.peligro{background:linear-gradient(180deg,#e05555,#a11616); color:#fff; border-color:#ff9a9a}
+  .fila-botones{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+  .mensaje{margin-top:12px; font-size:14px; min-height:20px}
+  .mensaje.error{color:#ff9a9a}
+  .mensaje.bien{color:#8df0ae}
+
+  /* --- Constructor --- */
+  .pregunta-edit{
+    border:1.5px solid rgba(245,197,66,.4); border-radius:14px; padding:14px; margin:12px 0;
+    background:rgba(4,8,38,.45);
+  }
+  .pregunta-edit .cab{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px}
+  .pregunta-edit .cab b{color:var(--oro-claro)}
+  .pregunta-edit .cab button{
+    font:inherit; font-size:13px; cursor:pointer; background:none; color:#ff9a9a;
+    border:1px solid #ff9a9a; border-radius:999px; padding:3px 12px;
+  }
+  .opciones-edit{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px}
+  .opcion-edit{display:flex; gap:7px; align-items:center}
+  .opcion-edit .letra{
+    flex:0 0 30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--azul-pastilla); border:1.5px solid var(--oro); color:var(--oro-claro); font-weight:900;
+  }
+  .opcion-edit input[type=radio]{width:20px; height:20px; accent-color:var(--oro); cursor:pointer}
+  .contador{color:var(--gris); font-size:14px; margin-top:8px}
+  .contador b{color:var(--oro-claro)}
+
+  /* --- Juego --- */
+  .escenario{display:grid; grid-template-columns:1fr 240px; gap:18px; align-items:start}
+  @media (max-width:820px){ .escenario{grid-template-columns:1fr} }
+  .modo-caja{display:flex; gap:12px; flex-wrap:wrap; margin:10px 0}
+  .modo-caja label{
+    flex:1; min-width:220px; cursor:pointer; border:2px solid #54679f; border-radius:14px; padding:12px 14px;
+    background:rgba(4,8,38,.45); font-size:14px; line-height:1.45;
+  }
+  .modo-caja label b{color:var(--oro-claro); font-size:16px; display:block; margin-bottom:3px}
+  .modo-caja input{accent-color:var(--oro); width:18px; height:18px; vertical-align:-3px; margin-right:6px}
+  .modo-caja label.elegido{border-color:var(--oro); box-shadow:0 0 0 3px rgba(245,197,66,.35)}
+
+  .pregunta-pastilla{
+    position:relative; text-align:center; font-size:clamp(19px,3.4vw,26px); font-weight:700; line-height:1.35;
+    background:linear-gradient(180deg,#1b31a8,#0a1660); border:2.5px solid var(--oro);
+    border-radius:16px; padding:22px 26px; margin-bottom:20px;
+    box-shadow:0 0 0 4px rgba(10,22,96,.8), 0 0 26px rgba(245,197,66,.25);
+  }
+  .pregunta-pastilla .num{position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    background:var(--oro); color:#241a00; font-size:13px; font-weight:900; border-radius:999px; padding:3px 14px; white-space:nowrap}
+  .respuestas{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:560px){ .respuestas{grid-template-columns:1fr} .opciones-edit{grid-template-columns:1fr} }
+  .respuesta{
+    font:inherit; text-align:left; cursor:pointer; color:var(--blanco); font-size:16.5px; font-weight:600;
+    background:linear-gradient(180deg,#16298f,#0a1660); border:2px solid #7d8fe0;
+    padding:13px 16px 13px 12px; display:flex; gap:11px; align-items:center;
+    clip-path:polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%);
+    border-radius:4px;
+  }
+  .respuesta .letra{
+    flex:0 0 30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--azul-pastilla); border:1.5px solid var(--oro); color:var(--oro-claro); font-weight:900; font-size:15px;
+  }
+  .respuesta:hover:not(:disabled){border-color:var(--oro); background:linear-gradient(180deg,#22399f,#101f7a)}
+  .respuesta:disabled{cursor:default; opacity:.92}
+  .respuesta.seleccionada{background:linear-gradient(180deg,#ffb340,var(--naranja)); border-color:#ffd28a; color:#2a1500}
+  .respuesta.seleccionada .letra{background:#fff3d6; color:#8a5a00; border-color:#8a5a00}
+  .respuesta.correcta{background:linear-gradient(180deg,#2ecc71,var(--verde)); border-color:#a7f3c0; color:#fff}
+  .respuesta.correcta .letra{background:#eafff1; color:#0c6b31; border-color:#0c6b31}
+  .respuesta.incorrecta{background:linear-gradient(180deg,#e05555,var(--rojo)); border-color:#ffc4c4; color:#fff}
+  .respuesta.incorrecta .letra{background:#ffecec; color:#8f1010; border-color:#8f1010}
+  .respuesta.eliminada{visibility:hidden}
+
+  .confirmar{
+    margin-top:18px; text-align:center; background:rgba(4,8,38,.6); border:1.5px dashed var(--oro);
+    border-radius:14px; padding:14px;
+  }
+  .confirmar p{font-size:18px; font-weight:700; margin-bottom:10px}
+  .estado-juego{text-align:center; font-size:17px; min-height:26px; margin:14px 0 4px; color:var(--oro-claro); font-weight:700}
+
+  .comodines{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:16px 0 4px}
+  .comodin{
+    font:inherit; font-weight:800; cursor:pointer; font-size:14px; color:var(--blanco);
+    background:radial-gradient(circle at 50% 32%, #3350e0, #0d1c66 75%);
+    border:2px solid var(--oro); border-radius:999px; padding:10px 18px; min-width:128px;
+  }
+  .comodin small{display:block; font-weight:600; color:var(--gris); font-size:11.5px}
+  .comodin:disabled{opacity:.38; cursor:not-allowed; text-decoration:line-through}
+  .comodin:hover:not(:disabled){filter:brightness(1.25)}
+  .barra-juego{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:10px}
+  .btn-sonido{background:none; border:1.5px solid #54679f; color:var(--blanco); border-radius:999px; padding:7px 15px; font:inherit; font-size:13.5px; cursor:pointer}
+
+  .escalera{
+    background:linear-gradient(180deg, rgba(23,38,130,.92), rgba(8,16,64,.96));
+    border:2px solid rgba(245,197,66,.55); border-radius:16px; padding:14px 12px;
+  }
+  .escalera h3{text-align:center; color:var(--oro-claro); font-family:Georgia,serif; font-size:16.5px; margin-bottom:10px}
+  .peldaño{
+    display:flex; justify-content:space-between; padding:4.5px 12px; border-radius:8px;
+    font-size:14.5px; color:#c6cdf5; font-weight:600;
+  }
+  .peldaño .n{color:var(--gris); font-weight:700; margin-right:8px}
+  .peldaño.seguro{color:var(--oro-claro)}
+  .peldaño.actual{background:linear-gradient(90deg,var(--oro),var(--oro-oscuro)); color:#241a00; font-weight:900; box-shadow:0 0 14px rgba(245,197,66,.55)}
+  .peldaño.actual .n{color:#5c4300}
+  .peldaño.ganado{color:#8df0ae}
+
+  /* Público */
+  .publico{margin-top:18px; background:rgba(4,8,38,.65); border:1.5px solid var(--oro); border-radius:14px; padding:16px}
+  .publico h3{color:var(--oro-claro); margin-bottom:10px; font-size:17px}
+  .fila-publico{display:flex; align-items:center; gap:10px; margin:7px 0; font-size:14.5px}
+  .fila-publico .quien{flex:0 0 118px; font-weight:700}
+  .fila-publico .pista{flex:1; background:#0a1440; border-radius:999px; height:20px; overflow:hidden; border:1px solid #54679f}
+  .fila-publico .relleno{height:100%; width:0; background:linear-gradient(90deg,#3350e0,var(--oro)); transition:width .9s ease}
+  .fila-publico .pct{flex:0 0 46px; text-align:right; font-weight:800; color:var(--oro-claro)}
+
+  /* Final */
+  .final{text-align:center; padding:10px 0}
+  .final .premio{font-family:Georgia,serif; font-size:clamp(30px,6vw,46px); color:var(--oro); font-weight:900; margin:8px 0}
+  .final .nota{font-size:21px; margin:6px 0}
+  .codigo-caja{
+    margin:14px auto; max-width:640px; background:#04082a; border:1.5px dashed var(--oro); border-radius:12px;
+    padding:12px; word-break:break-all; font-family:Consolas,Menlo,monospace; font-size:13.5px; color:var(--oro-claro);
+  }
+
+  /* Panel */
+  .barra{display:flex; align-items:center; gap:10px; margin:7px 0; font-size:14.5px}
+  .barra .quien{flex:0 0 170px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .barra .pista{flex:1; background:#0a1440; border-radius:999px; height:19px; overflow:hidden; border:1px solid #54679f}
+  .barra .relleno{height:100%; background:linear-gradient(90deg,#3350e0,var(--oro))}
+  .barra .relleno.roja{background:linear-gradient(90deg,#a11616,#e05555)}
+  .barra .valor{flex:0 0 118px; text-align:right; color:var(--oro-claro); font-weight:700}
+  .destacadas{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
+  @media (max-width:640px){ .destacadas{grid-template-columns:1fr} }
+  .destacada{border-radius:14px; padding:14px; border:1.5px solid}
+  .destacada.mala{background:rgba(217,43,43,.13); border-color:#e05555}
+  .destacada.buena{background:rgba(31,170,77,.13); border-color:#2ecc71}
+  .destacada h4{font-size:15px; margin-bottom:5px}
+  .destacada p{font-size:14.5px; line-height:1.5}
+  .resumen-panel{display:flex; gap:22px; flex-wrap:wrap; margin:10px 0; font-size:16px}
+  .resumen-panel b{color:var(--oro-claro); font-size:21px}
+  .aviso-huella{color:#ff9a9a; font-size:14px; margin-top:8px}
+  footer{text-align:center; color:var(--gris); font-size:12.5px; margin-top:26px; line-height:1.6}
+</style>
+</head>
+<body>
+<div class="envoltura">
+  <header>
+    <div class="focos">✦ ✦ ✦ ✦ ✦</div>
+    <h1>LA ESCALERA DEL MILLÓN</h1>
+    <p class="subtitulo">El juego de concurso de <b>tu</b> clase: el maestro crea las preguntas, el grupo juega… y si quieres, ¡también vale por nota!</p>
+  </header>
+
+  <nav class="pestanas">
+    <button id="tab-constructor" class="activa" type="button">🛠️ Constructor del maestro</button>
+    <button id="tab-juego" type="button">🎤 El juego</button>
+    <button id="tab-panel" type="button">📊 Panel del maestro</button>
+  </nav>
+
+  <!-- ================= VISTA 1 · CONSTRUCTOR ================= -->
+  <section class="vista activa" id="vista-constructor">
+    <div class="tarjeta">
+      <h2>Construye el banco de preguntas de tu clase</h2>
+      <p class="ayuda">Escribe las preguntas de tu tema con sus 4 opciones y marca la correcta. <b>El orden importa:</b> la primera pregunta vale $100 y cada siguiente sube un peldaño de la escalera, así que ponlas <b>de la más fácil a la más difícil</b>. Necesitas un mínimo de <b>5 preguntas</b> (la escalera llega hasta 15). Si escribes <b>más de 15</b>, las extras quedan como repuestos para el comodín «Cambio de pregunta». Tu banco se guarda solo en este navegador.</p>
+      <label class="etiqueta" for="banco-titulo">Título de la clase o tema</label>
+      <input type="text" id="banco-titulo" placeholder="Ej.: Ciencias — El sistema solar (5.º grado)">
+      <div id="lista-preguntas"></div>
+      <p class="contador" id="contador-preguntas"></p>
+      <div class="fila-botones">
+        <button class="btn secundario" id="btn-add" type="button">➕ Añadir pregunta</button>
+        <button class="btn secundario" id="btn-ejemplo" type="button">🐾 Usar el banco de ejemplo (Los Animales)</button>
+      </div>
+      <div class="fila-botones">
+        <button class="btn" id="btn-jugar-constructor" type="button">▶️ Jugar con mi banco</button>
+        <button class="btn secundario" id="btn-enlace" type="button">🔗 Copiar mi enlace de juego</button>
+      </div>
+      <p class="ayuda" style="margin-top:12px">El <b>enlace de juego</b> lleva tu banco dentro del propio enlace: compártelo (en tu LMS, por correo o donde quieras) y quien lo abra verá el juego con <b>tus</b> preguntas, sin cuentas ni servidores.</p>
+      <p class="mensaje" id="msg-constructor"></p>
+    </div>
+  </section>
+
+  <!-- ================= VISTA 2 · JUEGO ================= -->
+  <section class="vista" id="vista-juego">
+    <!-- Inicio del juego -->
+    <div class="tarjeta" id="juego-inicio">
+      <h2 id="inicio-titulo">Antes de salir al escenario…</h2>
+      <p class="ayuda" id="inicio-detalle"></p>
+      <p class="ayuda"><b>¿Cómo quieren jugar?</b></p>
+      <div class="modo-caja">
+        <label id="lbl-grupo"><input type="radio" name="modo" value="grupo" checked><b>👥 Modo grupo (proyector)</b>Se juega en colectivo, en voz alta, sin nombres. Al final se celebra el premio alcanzado.</label>
+        <label id="lbl-clase"><input type="radio" name="modo" value="clase"><b>📝 Modo clase (con nota)</b>Cada estudiante juega solo, escribe su nombre y al terminar recibe su nota y un código de resultado para entregar al maestro.</label>
+      </div>
+      <div id="caja-nombre" class="oculto">
+        <label class="etiqueta" for="nombre-estudiante">Tu nombre</label>
+        <input type="text" id="nombre-estudiante" placeholder="Escribe tu nombre completo">
+      </div>
+      <div class="fila-botones">
+        <button class="btn" id="btn-empezar" type="button">🎤 ¡A jugar!</button>
+        <button class="btn secundario" id="btn-ir-constructor" type="button">🛠️ Crear o editar preguntas</button>
+      </div>
+      <p class="mensaje" id="msg-inicio"></p>
+    </div>
+
+    <!-- Escenario -->
+    <div class="escenario oculto" id="juego-escenario">
+      <div class="tarjeta">
+        <div class="pregunta-pastilla"><span class="num" id="q-num"></span><span id="q-texto"></span></div>
+        <div class="respuestas" id="q-respuestas"></div>
+        <div class="confirmar oculto" id="caja-confirmar">
+          <p>¿Respuesta final?</p>
+          <div class="fila-botones" style="justify-content:center; margin-top:0">
+            <button class="btn" id="btn-final" type="button">✅ Sí, respuesta final</button>
+            <button class="btn secundario" id="btn-cambiar" type="button">↩️ Cambiar</button>
+          </div>
+        </div>
+        <p class="estado-juego" id="estado-juego"></p>
+        <div class="comodines">
+          <button class="comodin" id="com-5050" type="button">50 : 50<small>Elimina 2 respuestas</small></button>
+          <button class="comodin" id="com-publico" type="button">👥 Público<small>Pregúntale al público</small></button>
+          <button class="comodin" id="com-cambio" type="button">🔄 Cambio<small>Otra pregunta</small></button>
+        </div>
+        <div class="publico oculto" id="caja-publico">
+          <h3>👥 El público ha votado…</h3>
+          <div id="filas-publico"></div>
+          <p class="ayuda" style="margin:8px 0 0">El público suele acertar, pero no es infalible — sobre todo en las preguntas finales. La decisión es tuya.</p>
+        </div>
+        <div class="barra-juego">
+          <button class="btn peligro" id="btn-retirarse" type="button">🚪 Retirarse con lo ganado</button>
+          <button class="btn-sonido" id="btn-sonido" type="button">🔊 Sonido: sí</button>
+        </div>
+      </div>
+      <aside class="escalera">
+        <h3>💰 La escalera</h3>
+        <div id="lista-escalera"></div>
+      </aside>
+    </div>
+
+    <!-- Final del juego -->
+    <div class="tarjeta oculto" id="juego-final">
+      <div class="final">
+        <div class="focos">✦ ✦ ✦ ✦ ✦</div>
+        <h2 id="final-titulo">Fin del juego</h2>
+        <p class="ayuda" id="final-detalle" style="text-align:center"></p>
+        <div class="premio" id="final-premio"></div>
+        <div id="final-clase" class="oculto">
+          <p class="nota" id="final-nota"></p>
+          <p class="ayuda" style="text-align:center">Este es tu <b>código de resultado</b>. Cópialo y entrégaselo a tu maestro (o envíalo por WhatsApp):</p>
+          <div class="codigo-caja" id="final-codigo"></div>
+          <div class="fila-botones" style="justify-content:center">
+            <button class="btn" id="btn-copiar-codigo" type="button">📋 Copiar mi código</button>
+            <button class="btn secundario" id="btn-wa-codigo" type="button">💬 Enviar por WhatsApp</button>
+          </div>
+          <p class="mensaje" id="msg-codigo"></p>
+        </div>
+        <div class="fila-botones" style="justify-content:center">
+          <button class="btn" id="btn-otra-vez" type="button">🔁 Jugar otra vez</button>
+          <button class="btn secundario" id="btn-final-panel" type="button">📊 Ir al panel del maestro</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VISTA 3 · PANEL ================= -->
+  <section class="vista" id="vista-panel">
+    <div class="tarjeta">
+      <h2>Panel del maestro</h2>
+      <p class="ayuda">Cuando un estudiante juega en <b>modo clase</b>, al terminar recibe un código como <b>EM1-…</b>. Pega aquí los códigos de tu grupo, <b>uno por línea</b>, y pulsa «Analizar». Todo se calcula en tu navegador: no se envía nada a ningún servidor. El análisis usa el banco que esté cargado en el Constructor (ahora: <b id="panel-banco-nombre">—</b>).</p>
+      <label class="etiqueta" for="panel-entrada">Códigos de resultado de tus estudiantes</label>
+      <textarea id="panel-entrada" rows="6" placeholder="EM1-…&#10;EM1-…&#10;EM1-…"></textarea>
+      <div class="fila-botones">
+        <button class="btn" id="btn-analizar" type="button">📊 Analizar</button>
+        <button class="btn secundario" id="btn-ejemplo-panel" type="button">👀 Ver con datos de ejemplo</button>
+      </div>
+      <p class="mensaje" id="msg-panel"></p>
+      <div id="panel-resultados" class="oculto">
+        <div class="resumen-panel">
+          <span>Estudiantes<br><b id="res-total">0</b></span>
+          <span>Promedio del grupo<br><b id="res-promedio">0%</b></span>
+          <span>Mejor nota<br><b id="res-mejor">0%</b></span>
+        </div>
+        <h3>🏆 Ranking por nota</h3>
+        <div id="res-ranking"></div>
+        <h3>📊 Aciertos por pregunta (de la más fallada a la más acertada)</h3>
+        <div id="res-preguntas"></div>
+        <div class="destacadas">
+          <div class="destacada mala"><h4>❌ La pregunta que más fallaron</h4><p id="res-mas-fallada"></p></div>
+          <div class="destacada buena"><h4>✅ La pregunta que más acertaron</h4><p id="res-mas-acertada"></p></div>
+        </div>
+        <p class="aviso-huella" id="res-huella"></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>La Escalera del Millón · Un juego de Teachfolio para maestros — las preguntas las pones tú.<br>Todo ocurre en tu navegador: ni las preguntas ni los resultados salen de tu equipo.</footer>
+</div>
+
+<script>
+'use strict';
+/* === Almacenamiento seguro: localStorage con respaldo en memoria === */
+const memoria = {};
+const store = {
+  get(k){ try { return window.localStorage.getItem(k); }
+          catch(e){ return (k in memoria) ? memoria[k] : null; } },
+  set(k,v){ try { window.localStorage.setItem(k,v); }
+            catch(e){ memoria[k] = v; } },
+  del(k){ try { window.localStorage.removeItem(k); }
+          catch(e){ delete memoria[k]; } }
+};
+
+/* === LOGICA PURA (sin DOM: se prueba en Node tal cual) === */
+const ESCALERA = [100,200,300,500,1000,2000,4000,8000,16000,32000,64000,125000,250000,500000,1000000];
+const REFUGIOS = [5,10]; /* peldaños (1-based) que garantizan premio al caer: 5=$1,000 · 10=$32,000 */
+
+const BANCO_EJEMPLO = {
+  titulo: 'Los Animales — Vocabulario en Español (ejemplo)',
+  preguntas: [
+    { texto:'¿Cómo se dice «dog» en español?', opciones:['el gato','el perro','el pájaro','el pez'], correcta:1 },
+    { texto:'¿Qué animal hace «miau»?', opciones:['el perro','la vaca','el gato','el pato'], correcta:2 },
+    { texto:'El elefante es un animal…', opciones:['muy grande','muy pequeño','muy rápido','muy silencioso'], correcta:0 },
+    { texto:'¿Cómo se dice «bird» en español?', opciones:['el pez','el pájaro','la rana','el caballo'], correcta:1 },
+    { texto:'La vaca nos da…', opciones:['miel','leche','huevos','lana'], correcta:1 },
+    { texto:'¿Qué animal vive en el agua?', opciones:['el pez','el gato','el caballo','el pájaro'], correcta:0 },
+    { texto:'El caballo puede…', opciones:['correr muy rápido','volar muy alto','nadar muy profundo','trepar a los árboles'], correcta:0 },
+    { texto:'¿Cuál de estos animales es el más grande?', opciones:['la hormiga','el ratón','la mariposa','la ballena'], correcta:3 },
+    { texto:'El animal que hace la miel es…', opciones:['la gallina','la abeja','la oveja','la cabra'], correcta:1 },
+    { texto:'¿Cómo se dice «horse» en español?', opciones:['el toro','la vaca','el caballo','el cerdo'], correcta:2 }
+  ]
+};
+
+function b64encodeUtf8(s){
+  return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64decodeUtf8(s){
+  let b = s.replace(/-/g,'+').replace(/_/g,'/');
+  while (b.length % 4) b += '=';
+  return decodeURIComponent(escape(atob(b)));
+}
+/* Huella corta y estable del banco: título + textos + correctas (FNV-1a, 6 hex) */
+function huellaBanco(banco){
+  let h = 0x811c9dc5;
+  const s = (banco.titulo || '') + '|' + banco.preguntas.map(function(p){
+    return p.texto + '#' + p.correcta + '#' + p.opciones.join('~');
+  }).join('|');
+  for (let i = 0; i < s.length; i++){
+    h ^= s.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return ('00000' + h.toString(16)).slice(-6);
+}
+/* Banco <-> texto del enlace (viaja en el #hash de la URL, sin servidor) */
+function codificarBanco(banco){
+  const limpio = { t: banco.titulo || '',
+    q: banco.preguntas.map(function(p){ return [p.texto, p.opciones.slice(0,4), p.correcta]; }) };
+  return b64encodeUtf8(JSON.stringify(limpio));
+}
+function decodificarBanco(str){
+  try {
+    const d = JSON.parse(b64decodeUtf8(str));
+    if (!d || !Array.isArray(d.q) || d.q.length === 0) return null;
+    const preguntas = [];
+    for (let i = 0; i < d.q.length; i++){
+      const it = d.q[i];
+      if (!Array.isArray(it) || typeof it[0] !== 'string' || !Array.isArray(it[1]) ||
+          it[1].length !== 4 || typeof it[2] !== 'number' || it[2] < 0 || it[2] > 3) return null;
+      preguntas.push({ texto: it[0], opciones: it[1].map(String), correcta: it[2] });
+    }
+    return { titulo: String(d.t || ''), preguntas: preguntas };
+  } catch(e){ return null; }
+}
+/* La escalera usa las primeras min(15, N) preguntas; el resto son repuestos */
+function largoEscalera(banco){ return Math.min(ESCALERA.length, banco.preguntas.length); }
+function premioDe(peldano){ return peldano >= 1 ? ESCALERA[peldano - 1] : 0; } /* peldano 1-based ya alcanzado */
+function premioAlCaer(acertadas){ /* premio garantizado si falla después de acertar `acertadas` */
+  let p = 0;
+  REFUGIOS.forEach(function(r){ if (acertadas >= r) p = ESCALERA[r - 1]; });
+  return p;
+}
+/* 50:50 — devuelve los 2 índices a eliminar: siempre incorrectos, nunca la correcta */
+function cincuenta(correcta){
+  const mal = [0,1,2,3].filter(function(i){ return i !== correcta; });
+  for (let i = mal.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = mal[i]; mal[i] = mal[j]; mal[j] = t;
+  }
+  return mal.slice(0, 2).sort(function(a,b){ return a - b; });
+}
+/* Pregúntale al público — encuesta simulada. Devuelve {indice: %} solo de opciones
+   visibles; los % siempre suman 100. La fiabilidad baja con el nivel: el público
+   acierta casi siempre al principio y duda (a veces se equivoca) en las finales. */
+function encuestaPublico(correcta, visibles, nivel, totalNiveles){
+  const frac = totalNiveles > 1 ? (nivel - 1) / (totalNiveles - 1) : 0;
+  const dosOpciones = visibles.length <= 2;
+  let base = dosOpciones ? (0.85 - 0.30 * frac) : (0.78 - 0.40 * frac);
+  let parteCorrecta = Math.round(base * 100 + (Math.random() * 24 - 12));
+  parteCorrecta = Math.max(dosOpciones ? 40 : 25, Math.min(94, parteCorrecta));
+  const resto = 100 - parteCorrecta;
+  const malas = visibles.filter(function(i){ return i !== correcta; });
+  const pesos = malas.map(function(){ return 0.35 + Math.random(); });
+  /* En las preguntas finales suele haber una respuesta «trampa» muy popular:
+     a veces el público se amontona en una incorrecta y puede engañar. */
+  if (malas.length > 1 && Math.random() < frac * 0.85){
+    const trampa = Math.floor(Math.random() * malas.length);
+    pesos[trampa] *= (1.6 + frac * 2.2);
+  }
+  const sumaPesos = pesos.reduce(function(a,b){ return a + b; }, 0);
+  const salida = {};
+  let repartido = 0;
+  malas.forEach(function(idx, k){
+    if (k === malas.length - 1){ salida[idx] = resto - repartido; }
+    else {
+      const v = Math.floor(resto * pesos[k] / sumaPesos);
+      salida[idx] = v; repartido += v;
+    }
+  });
+  salida[correcta] = parteCorrecta;
+  return salida;
+}
+/* Nota del modo clase: aciertos / total de preguntas del juego, en % entero */
+function calcularNota(aciertos, total){ return total > 0 ? Math.round(aciertos / total * 100) : 0; }
+/* Código de resultado del estudiante (espíritu TF1-): nombre + huella + aciertos */
+function codificarResultado(nombre, huella, bits, enfrentadas){
+  const payload = JSON.stringify({ n: nombre, h: huella, r: bits.join(''), f: enfrentadas });
+  return 'EM1-' + b64encodeUtf8(payload);
+}
+function decodificarCodigo(linea){
+  if (!linea) return null;
+  const m = String(linea).match(/EM1-([A-Za-z0-9\-_]+)/);
+  if (!m) return null;
+  try {
+    const d = JSON.parse(b64decodeUtf8(m[1]));
+    if (typeof d.n !== 'string' || typeof d.r !== 'string' || !/^[01]+$/.test(d.r)) return null;
+    const bits = d.r.split('').map(function(c){ return c === '1' ? 1 : 0; });
+    const aciertos = bits.reduce(function(a,b){ return a + b; }, 0);
+    return { nombre: d.n, huella: typeof d.h === 'string' ? d.h : '',
+             bits: bits, enfrentadas: Array.isArray(d.f) ? d.f : null,
+             aciertos: aciertos, total: bits.length,
+             pct: calcularNota(aciertos, bits.length) };
+  } catch(e){ return null; }
+}
+/* Análisis del panel: ranking, promedio, acierto por pregunta del banco cargado.
+   `bancoJuego` = preguntas de la escalera (las primeras largoEscalera del banco). */
+function analizarGrupo(estudiantes, bancoJuego){
+  const n = estudiantes.length;
+  const promedio = n ? Math.round(estudiantes.reduce(function(a,e){ return a + e.pct; }, 0) / n) : 0;
+  const mejor = n ? Math.max.apply(null, estudiantes.map(function(e){ return e.pct; })) : 0;
+  const ranking = estudiantes.slice().sort(function(a,b){ return b.pct - a.pct || a.nombre.localeCompare(b.nombre); });
+  const conteo = bancoJuego.map(function(){ return { correctas: 0, intentos: 0 }; });
+  estudiantes.forEach(function(e){
+    for (let j = 0; j < e.bits.length; j++){
+      const idxBanco = e.enfrentadas ? e.enfrentadas[j] : j;
+      if (typeof idxBanco === 'number' && idxBanco >= 0 && idxBanco < bancoJuego.length){
+        conteo[idxBanco].intentos++;
+        conteo[idxBanco].correctas += e.bits[j];
+      }
+    }
+  });
+  const porPregunta = bancoJuego.map(function(p, i){
+    const c = conteo[i];
+    return { num: i + 1, texto: p.texto,
+             pct: c.intentos ? Math.round(c.correctas / c.intentos * 100) : 0, intentos: c.intentos };
+  });
+  const ordenadas = porPregunta.slice().sort(function(a,b){ return a.pct - b.pct || a.num - b.num; });
+  return { total: n, promedio: promedio, mejor: mejor, ranking: ranking,
+           porPregunta: porPregunta, ordenadas: ordenadas,
+           masFallada: ordenadas.length ? ordenadas[0] : null,
+           masAcertada: ordenadas.length ? ordenadas[ordenadas.length - 1] : null };
+}
+/* === FIN LOGICA PURA === */
+
+/* === Interfaz === */
+const $ = function(id){ return document.getElementById(id); };
+const LETRAS = ['A','B','C','D'];
+function escaparHtml(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+function fmtDinero(n){ return '$' + n.toLocaleString('en-US'); }
+
+/* ---------- Estado general ---------- */
+let banco = { titulo:'', preguntas:[] };   // banco activo (constructor / enlace / ejemplo)
+let bancoDesdeEnlace = false;
+
+/* ---------- Pestañas ---------- */
+function mostrarVista(cual){
+  ['constructor','juego','panel'].forEach(function(v){
+    $('vista-' + v).classList.toggle('activa', v === cual);
+    $('tab-' + v).classList.toggle('activa', v === cual);
+  });
+  if (cual === 'panel') actualizarPanelBanco();
+  if (cual === 'juego') actualizarInicioJuego();
+}
+['constructor','juego','panel'].forEach(function(v){
+  $('tab-' + v).addEventListener('click', function(){ mostrarVista(v); });
+});
+
+/* ================= CONSTRUCTOR ================= */
+function tarjetaPregunta(p, idx){
+  const div = document.createElement('div');
+  div.className = 'pregunta-edit';
+  let ops = '';
+  for (let k = 0; k < 4; k++){
+    ops += '<div class="opcion-edit"><span class="letra">' + LETRAS[k] + '</span>' +
+      '<input type="text" data-campo="opcion" data-k="' + k + '" placeholder="Opción ' + LETRAS[k] + '" value="' + escaparHtml(p ? p.opciones[k] : '') + '">' +
+      '<input type="radio" name="correcta-' + idx + '" data-campo="correcta" value="' + k + '"' +
+      (p && p.correcta === k ? ' checked' : '') + ' title="Marcar como correcta"></div>';
+  }
+  div.innerHTML =
+    '<div class="cab"><b>Pregunta ' + (idx + 1) + '</b>' +
+    '<button type="button" data-accion="borrar">🗑️ Quitar</button></div>' +
+    '<input type="text" data-campo="texto" placeholder="Escribe la pregunta…" value="' + escaparHtml(p ? p.texto : '') + '">' +
+    '<div class="opciones-edit">' + ops + '</div>' +
+    '<p class="ayuda" style="margin:8px 0 0">Marca con el círculo la respuesta <b>correcta</b>.</p>';
+  return div;
+}
+function pintarConstructor(){
+  const lista = $('lista-preguntas');
+  lista.innerHTML = '';
+  banco.preguntas.forEach(function(p, i){ lista.appendChild(tarjetaPregunta(p, i)); });
+  actualizarContador();
+}
+function leerConstructor(){
+  const tarjetas = $('lista-preguntas').children;
+  const preguntas = [];
+  for (let i = 0; i < tarjetas.length; i++){
+    const t = tarjetas[i];
+    const texto = t.querySelector('[data-campo="texto"]').value.trim();
+    const opciones = [];
+    t.querySelectorAll('[data-campo="opcion"]').forEach(function(inp){ opciones.push(inp.value.trim()); });
+    const marcada = t.querySelector('[data-campo="correcta"]:checked');
+    preguntas.push({ texto: texto, opciones: opciones,
+                     correcta: marcada ? parseInt(marcada.value, 10) : -1 });
+  }
+  return { titulo: $('banco-titulo').value.trim(), preguntas: preguntas };
+}
+function actualizarContador(){
+  const n = $('lista-preguntas').children.length;
+  const enEscalera = Math.min(ESCALERA.length, n);
+  let extra = '';
+  if (n > ESCALERA.length) extra = ' · ' + (n - ESCALERA.length) + ' de repuesto pa’l comodín de Cambio';
+  $('contador-preguntas').innerHTML = 'Tienes <b>' + n + '</b> preguntas · la escalera usa <b>' +
+    enEscalera + '</b> (mínimo 5)' + extra;
+}
+function guardarBanco(){
+  try { store.set('em1-banco', JSON.stringify(banco)); } catch(e){}
+}
+function sincronizarBanco(mostrarErrores){
+  banco = leerConstructor();
+  guardarBanco();
+  const problemas = [];
+  if (banco.preguntas.length < 5) problemas.push('necesitas al menos 5 preguntas (tienes ' + banco.preguntas.length + ')');
+  banco.preguntas.forEach(function(p, i){
+    if (!p.texto) problemas.push('la pregunta ' + (i + 1) + ' no tiene enunciado');
+    if (p.opciones.some(function(o){ return !o; })) problemas.push('la pregunta ' + (i + 1) + ' tiene opciones vacías');
+    if (p.correcta < 0) problemas.push('la pregunta ' + (i + 1) + ' no tiene respuesta correcta marcada');
+  });
+  const msg = $('msg-constructor');
+  if (problemas.length){
+    if (mostrarErrores){
+      msg.className = 'mensaje error';
+      msg.textContent = '⚠️ Revisa tu banco: ' + problemas[0] + (problemas.length > 1 ? ' (y ' + (problemas.length - 1) + ' cosa más)' : '') + '.';
+    }
+    return false;
+  }
+  msg.className = 'mensaje bien';
+  msg.textContent = '✔️ Banco listo: ' + banco.preguntas.length + ' preguntas' +
+    (banco.titulo ? ' — «' + banco.titulo + '»' : '') + '.';
+  return true;
+}
+$('lista-preguntas').addEventListener('input', function(){ banco = leerConstructor(); guardarBanco(); actualizarContador(); });
+$('lista-preguntas').addEventListener('change', function(){ banco = leerConstructor(); guardarBanco(); });
+$('lista-preguntas').addEventListener('click', function(ev){
+  const btn = ev.target.closest('[data-accion="borrar"]');
+  if (!btn) return;
+  banco = leerConstructor();
+  const tarjeta = btn.closest('.pregunta-edit');
+  const idx = Array.prototype.indexOf.call($('lista-preguntas').children, tarjeta);
+  if (idx >= 0){ banco.preguntas.splice(idx, 1); guardarBanco(); pintarConstructor(); }
+});
+$('banco-titulo').addEventListener('input', function(){ banco = leerConstructor(); guardarBanco(); });
+$('btn-add').addEventListener('click', function(){
+  banco = leerConstructor();
+  banco.preguntas.push({ texto:'', opciones:['','','',''], correcta:-1 });
+  guardarBanco(); pintarConstructor();
+});
+$('btn-ejemplo').addEventListener('click', function(){
+  banco = JSON.parse(JSON.stringify(BANCO_EJEMPLO));
+  $('banco-titulo').value = banco.titulo;
+  guardarBanco(); pintarConstructor();
+  $('msg-constructor').className = 'mensaje bien';
+  $('msg-constructor').textContent = '🐾 Banco de ejemplo cargado: «Los Animales», 10 preguntas. Puedes editarlo o jugar ya.';
+});
+$('btn-jugar-constructor').addEventListener('click', function(){
+  if (sincronizarBanco(true)) mostrarVista('juego');
+});
+$('btn-enlace').addEventListener('click', function(){
+  if (!sincronizarBanco(true)) return;
+  const url = location.href.split('#')[0] + '#b=' + codificarBanco(banco);
+  copiarTexto(url, $('msg-constructor'), '🔗 ¡Enlace copiado! Compártelo y quien lo abra jugará con tus preguntas.');
+});
+
+/* ---------- Copiar al portapapeles (con respaldo) ---------- */
+function copiarTexto(texto, msgEl, textoOk){
+  function bien(){ if (msgEl){ msgEl.className = 'mensaje bien'; msgEl.textContent = textoOk; } }
+  function mal(){ if (msgEl){ msgEl.className = 'mensaje error'; msgEl.textContent = 'No se pudo copiar solo. Mantén pulsado el texto y cópialo a mano.'; } }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(bien, function(){
+        if (!copiaRespaldo(texto)) mal(); else bien();
+      });
+    } else { if (!copiaRespaldo(texto)) mal(); else bien(); }
+  } catch(e){ if (!copiaRespaldo(texto)) mal(); else bien(); }
+}
+function copiaRespaldo(texto){
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch(e){ return false; }
+}
+
+/* ================= JUEGO ================= */
+let sonido = true, ctxAudio = null;
+function tono(freq, dur, tipo, retraso){
+  if (!sonido) return;
+  try {
+    if (!ctxAudio) ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = ctxAudio.currentTime + (retraso || 0);
+    const o = ctxAudio.createOscillator(), g = ctxAudio.createGain();
+    o.type = tipo || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(ctxAudio.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  } catch(e){}
+}
+const sfx = {
+  elegir: function(){ tono(660, 0.09, 'triangle'); },
+  bien:   function(){ tono(523, 0.14, 'sine'); tono(659, 0.14, 'sine', 0.12); tono(784, 0.26, 'sine', 0.24); },
+  mal:    function(){ tono(196, 0.35, 'sawtooth'); tono(147, 0.45, 'sawtooth', 0.1); },
+  comodin:function(){ tono(880, 0.1, 'triangle'); tono(1174, 0.16, 'triangle', 0.09); },
+  final:  function(){ [523,659,784,1046].forEach(function(f, i){ tono(f, 0.22, 'sine', i * 0.13); }); }
+};
+$('btn-sonido').addEventListener('click', function(){
+  sonido = !sonido;
+  $('btn-sonido').textContent = sonido ? '🔊 Sonido: sí' : '🔇 Sonido: no';
+  if (sonido) sfx.elegir();
+});
+
+let J = null; /* estado de la partida */
+function bancoListoParaJugar(){
+  return banco && banco.preguntas.length >= 5 &&
+    banco.preguntas.every(function(p){ return p.texto && p.correcta >= 0 && p.opciones.every(function(o){ return o; }); });
+}
+function actualizarInicioJuego(){
+  const det = $('inicio-detalle');
+  if (bancoListoParaJugar()){
+    det.innerHTML = 'Banco cargado: <b>«' + escaparHtml(banco.titulo || 'Sin título') + '»</b> — ' +
+      banco.preguntas.length + ' preguntas. La escalera tiene <b>' + largoEscalera(banco) +
+      '</b> peldaños y llega a <b>' + fmtDinero(premioDe(largoEscalera(banco))) + '</b>.' +
+      (bancoDesdeEnlace ? ' <b>(Llegó por un enlace compartido.)</b>' : '');
+  } else {
+    det.innerHTML = 'Todavía no hay un banco válido. Ve al <b>Constructor</b>, usa el banco de ejemplo o crea el tuyo (mínimo 5 preguntas completas).';
+  }
+}
+document.querySelectorAll('input[name="modo"]').forEach(function(r){
+  r.addEventListener('change', function(){
+    const clase = document.querySelector('input[name="modo"]:checked').value === 'clase';
+    $('caja-nombre').classList.toggle('oculto', !clase);
+    $('lbl-grupo').classList.toggle('elegido', !clase);
+    $('lbl-clase').classList.toggle('elegido', clase);
+  });
+});
+$('lbl-grupo').classList.add('elegido');
+$('btn-ir-constructor').addEventListener('click', function(){ mostrarVista('constructor'); });
+
+$('btn-empezar').addEventListener('click', function(){
+  if (!bancoListoParaJugar()){
+    $('msg-inicio').className = 'mensaje error';
+    $('msg-inicio').textContent = '⚠️ Primero carga un banco válido en el Constructor.';
+    return;
+  }
+  const modo = document.querySelector('input[name="modo"]:checked').value;
+  const nombre = $('nombre-estudiante').value.trim();
+  if (modo === 'clase' && !nombre){
+    $('msg-inicio').className = 'mensaje error';
+    $('msg-inicio').textContent = '⚠️ En modo clase, escribe tu nombre: va en tu código de resultado.';
+    return;
+  }
+  $('msg-inicio').textContent = '';
+  empezarPartida(modo, nombre);
+});
+
+function empezarPartida(modo, nombre){
+  const n = largoEscalera(banco);
+  J = {
+    modo: modo, nombre: nombre,
+    orden: [],            // índices del banco en el orden jugado (peldaño i -> orden[i])
+    repuestos: [],        // índices del banco más allá de la escalera
+    nivel: 1,             // peldaño actual (1-based)
+    acertadas: 0,
+    bits: [],             // 1/0 por peldaño jugado
+    seleccion: -1, bloqueado: false,
+    comodines: { c5050: true, publico: true, cambio: true },
+    eliminadas: []
+  };
+  for (let i = 0; i < n; i++) J.orden.push(i);
+  for (let i = n; i < banco.preguntas.length; i++) J.repuestos.push(i);
+  $('juego-inicio').classList.add('oculto');
+  $('juego-final').classList.add('oculto');
+  $('juego-escenario').classList.remove('oculto');
+  pintarEscalera();
+  pintarPregunta();
+}
+function preguntaActual(){ return banco.preguntas[J.orden[J.nivel - 1]]; }
+
+function pintarEscalera(){
+  const n = J.orden.length;
+  let html = '';
+  for (let k = n; k >= 1; k--){
+    const clases = ['peldaño'];
+    if (REFUGIOS.indexOf(k) >= 0) clases.push('seguro');
+    if (k === J.nivel) clases.push('actual');
+    if (k < J.nivel) clases.push('ganado');
+    html += '<div class="' + clases.join(' ') + '"><span><span class="n">' + k + '</span>' +
+      (REFUGIOS.indexOf(k) >= 0 ? '🛡️ ' : '') + '</span><span>' + fmtDinero(ESCALERA[k - 1]) + '</span></div>';
+  }
+  $('lista-escalera').innerHTML = html;
+}
+function pintarPregunta(){
+  const p = preguntaActual();
+  J.seleccion = -1; J.bloqueado = false; J.eliminadas = [];
+  $('q-num').textContent = 'Pregunta ' + J.nivel + ' de ' + J.orden.length + ' · ' + fmtDinero(ESCALERA[J.nivel - 1]);
+  $('q-texto').textContent = p.texto;
+  $('caja-publico').classList.add('oculto');
+  $('caja-confirmar').classList.add('oculto');
+  $('estado-juego').textContent = '';
+  const cont = $('q-respuestas');
+  cont.innerHTML = '';
+  p.opciones.forEach(function(op, i){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'respuesta'; b.dataset.idx = i;
+    b.innerHTML = '<span class="letra">' + LETRAS[i] + '</span><span>' + escaparHtml(op) + '</span>';
+    b.addEventListener('click', function(){ elegirRespuesta(i); });
+    cont.appendChild(b);
+  });
+  actualizarComodines();
+  pintarEscalera();
+}
+function actualizarComodines(){
+  $('com-5050').disabled = !J.comodines.c5050 || J.bloqueado;
+  $('com-publico').disabled = !J.comodines.publico || J.bloqueado;
+  const cambioBtn = $('com-cambio');
+  cambioBtn.disabled = !J.comodines.cambio || J.bloqueado || J.repuestos.length === 0;
+  cambioBtn.querySelector('small').textContent = J.repuestos.length
+    ? 'Otra pregunta (' + J.repuestos.length + ' repuesto' + (J.repuestos.length > 1 ? 's' : '') + ')'
+    : 'Sin repuestos en el banco';
+}
+function elegirRespuesta(i){
+  if (J.bloqueado || J.eliminadas.indexOf(i) >= 0) return;
+  J.seleccion = i; sfx.elegir();
+  document.querySelectorAll('#q-respuestas .respuesta').forEach(function(b){
+    b.classList.toggle('seleccionada', parseInt(b.dataset.idx, 10) === i);
+  });
+  $('caja-confirmar').classList.remove('oculto');
+}
+$('btn-cambiar').addEventListener('click', function(){
+  J.seleccion = -1;
+  document.querySelectorAll('#q-respuestas .respuesta').forEach(function(b){ b.classList.remove('seleccionada'); });
+  $('caja-confirmar').classList.add('oculto');
+});
+$('btn-final').addEventListener('click', function(){
+  if (J.seleccion < 0 || J.bloqueado) return;
+  J.bloqueado = true;
+  $('caja-confirmar').classList.add('oculto');
+  actualizarComodines();
+  const p = preguntaActual();
+  const acierto = J.seleccion === p.correcta;
+  document.querySelectorAll('#q-respuestas .respuesta').forEach(function(b){
+    const idx = parseInt(b.dataset.idx, 10);
+    b.disabled = true;
+    if (idx === p.correcta) b.classList.add('correcta');
+    else if (idx === J.seleccion) b.classList.add('incorrecta');
+  });
+  if (acierto){
+    J.bits.push(1); J.acertadas++;
+    sfx.bien();
+    if (J.nivel >= J.orden.length){
+      $('estado-juego').textContent = '🎉 ¡CORRECTA! ¡Llegaste a lo más alto de la escalera!';
+      setTimeout(function(){ terminarPartida('millon'); }, 1600);
+    } else {
+      $('estado-juego').textContent = '✅ ¡Correcta! Subes a ' + fmtDinero(ESCALERA[J.nivel - 1]) + '. Siguiente peldaño…';
+      J.nivel++;
+      setTimeout(pintarPregunta, 1600);
+    }
+  } else {
+    while (J.bits.length < J.nivel) J.bits.push(0);
+    sfx.mal();
+    $('estado-juego').textContent = '❌ Esa no era. La correcta era la ' + LETRAS[p.correcta] + '.';
+    setTimeout(function(){ terminarPartida('fallo'); }, 1800);
+  }
+});
+$('com-5050').addEventListener('click', function(){
+  if (!J.comodines.c5050 || J.bloqueado) return;
+  J.comodines.c5050 = false; sfx.comodin();
+  const p = preguntaActual();
+  J.eliminadas = cincuenta(p.correcta);
+  if (J.eliminadas.indexOf(J.seleccion) >= 0){
+    J.seleccion = -1;
+    $('caja-confirmar').classList.add('oculto');
+  }
+  document.querySelectorAll('#q-respuestas .respuesta').forEach(function(b){
+    const idx = parseInt(b.dataset.idx, 10);
+    if (J.eliminadas.indexOf(idx) >= 0){ b.classList.add('eliminada'); b.classList.remove('seleccionada'); }
+  });
+  $('estado-juego').textContent = '✂️ 50:50 — quedan dos opciones. ¡Tú puedes!';
+  actualizarComodines();
+});
+$('com-publico').addEventListener('click', function(){
+  if (!J.comodines.publico || J.bloqueado) return;
+  J.comodines.publico = false; sfx.comodin();
+  const p = preguntaActual();
+  const visibles = [0,1,2,3].filter(function(i){ return J.eliminadas.indexOf(i) < 0; });
+  const voto = encuestaPublico(p.correcta, visibles, J.nivel, J.orden.length);
+  const cont = $('filas-publico');
+  cont.innerHTML = '';
+  visibles.forEach(function(i){
+    const fila = document.createElement('div');
+    fila.className = 'fila-publico';
+    fila.innerHTML = '<span class="quien">' + LETRAS[i] + '. ' + escaparHtml(p.opciones[i]) + '</span>' +
+      '<span class="pista"><span class="relleno" data-pct="' + voto[i] + '"></span></span>' +
+      '<span class="pct">' + voto[i] + '%</span>';
+    cont.appendChild(fila);
+  });
+  $('caja-publico').classList.remove('oculto');
+  setTimeout(function(){
+    cont.querySelectorAll('.relleno').forEach(function(r){ r.style.width = r.dataset.pct + '%'; });
+  }, 60);
+  actualizarComodines();
+});
+$('com-cambio').addEventListener('click', function(){
+  if (!J.comodines.cambio || J.bloqueado || !J.repuestos.length) return;
+  J.comodines.cambio = false; sfx.comodin();
+  const repuesto = J.repuestos.shift();
+  J.orden[J.nivel - 1] = repuesto;
+  $('estado-juego').textContent = '🔄 Pregunta cambiada. ¡A por ella!';
+  pintarPregunta();
+});
+$('btn-retirarse').addEventListener('click', function(){
+  if (!J || J.bloqueado) return;
+  terminarPartida('retiro');
+});
+
+function terminarPartida(motivo){
+  /* Completa los bits de los peldaños no jugados con 0 (nota sobre el total) */
+  while (J.bits.length < J.orden.length) J.bits.push(0);
+  let premio, titulo, detalle;
+  if (motivo === 'millon'){
+    premio = premioDe(J.orden.length);
+    titulo = '🏆 ¡LA ESCALERA COMPLETA!';
+    detalle = 'Respuesta perfecta: acertaste las ' + J.orden.length + ' preguntas del banco.';
+  } else if (motivo === 'fallo'){
+    premio = premioAlCaer(J.acertadas);
+    titulo = 'Fin del juego';
+    detalle = 'Acertaste ' + J.acertadas + ' de ' + J.orden.length + ' preguntas.' +
+      (premio > 0 ? ' Caes al refugio seguro y te llevas ' + fmtDinero(premio) + '.' : ' Esta vez no hay premio, pero sí mucho aprendizaje.');
+  } else {
+    premio = premioDe(J.acertadas);
+    titulo = '🚪 Te retiras con lo ganado';
+    detalle = 'Decidiste plantarte con ' + J.acertadas + ' respuestas correctas. ¡Buena estrategia!';
+  }
+  $('juego-escenario').classList.add('oculto');
+  $('juego-final').classList.remove('oculto');
+  $('final-titulo').textContent = titulo;
+  $('final-detalle').textContent = detalle;
+  $('final-premio').textContent = 'Premio: ' + fmtDinero(premio);
+  if (J.modo === 'clase'){
+    const nota = calcularNota(J.acertadas, J.orden.length);
+    $('final-clase').classList.remove('oculto');
+    $('final-nota').innerHTML = '📝 <b>' + escaparHtml(J.nombre) + '</b> · Aciertos: <b>' +
+      J.acertadas + '/' + J.orden.length + '</b> · Nota: <b>' + nota + '%</b>';
+    $('final-codigo').textContent = codificarResultado(J.nombre, huellaBanco(banco), J.bits, J.orden.slice());
+    $('msg-codigo').textContent = '';
+  } else {
+    $('final-clase').classList.add('oculto');
+  }
+  if (motivo === 'millon') sfx.final();
+}
+$('btn-copiar-codigo').addEventListener('click', function(){
+  copiarTexto($('final-codigo').textContent, $('msg-codigo'), '📋 ¡Código copiado! Pégalo donde tu maestro te indique.');
+});
+$('btn-wa-codigo').addEventListener('click', function(){
+  const texto = 'Mi código de resultado de La Escalera del Millón (' +
+    (banco.titulo || 'sin título') + '): ' + $('final-codigo').textContent;
+  window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+});
+$('btn-otra-vez').addEventListener('click', function(){
+  $('juego-final').classList.add('oculto');
+  $('juego-inicio').classList.remove('oculto');
+  actualizarInicioJuego();
+});
+$('btn-final-panel').addEventListener('click', function(){ mostrarVista('panel'); });
+
+/* ================= PANEL DEL MAESTRO ================= */
+function bancoJuego(){ return banco.preguntas.slice(0, largoEscalera(banco)); }
+function actualizarPanelBanco(){
+  $('panel-banco-nombre').textContent = banco && banco.preguntas.length
+    ? '«' + (banco.titulo || 'Sin título') + '» (' + banco.preguntas.length + ' preguntas)' : '—';
+}
+function barraFila(etiqueta, detalle, pct, roja){
+  return '<div class="barra"><span class="quien">' + escaparHtml(etiqueta) + '</span>' +
+    '<span class="pista"><span class="relleno' + (roja ? ' roja' : '') + '" style="width:' + pct + '%"></span></span>' +
+    '<span class="valor">' + detalle + '</span></div>';
+}
+function ejecutarAnalisis(texto){
+  const lineas = texto.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  const validos = [], invalidos = [];
+  lineas.forEach(function(l){
+    const d = decodificarCodigo(l);
+    if (d) validos.push(d); else invalidos.push(l);
+  });
+  const msg = $('msg-panel');
+  if (!validos.length){
+    $('panel-resultados').classList.add('oculto');
+    msg.className = 'mensaje error';
+    msg.textContent = '⚠️ No se encontró ningún código válido. Pega al menos un código EM1-… y vuelve a intentarlo.';
+    return;
+  }
+  const huella = huellaBanco(banco);
+  const deEsteBanco = validos.filter(function(e){ return e.huella === huella; });
+  const deOtroBanco = validos.length - deEsteBanco.length;
+  const usar = deEsteBanco.length ? deEsteBanco : validos;
+  const r = analizarGrupo(usar, bancoJuego());
+  msg.className = 'mensaje bien';
+  msg.textContent = '✔️ ' + r.total + ' código' + (r.total > 1 ? 's' : '') + ' analizado' + (r.total > 1 ? 's' : '') +
+    (invalidos.length ? ' · ' + invalidos.length + ' línea(s) sin código válido, ignoradas' : '') + '.';
+  $('res-total').textContent = r.total;
+  $('res-promedio').textContent = r.promedio + '%';
+  $('res-mejor').textContent = r.mejor + '%';
+  $('res-ranking').innerHTML = r.ranking.map(function(e, i){
+    return barraFila((i + 1) + '. ' + e.nombre, e.aciertos + '/' + e.total + ' · ' + e.pct + '%', e.pct, false);
+  }).join('');
+  $('res-preguntas').innerHTML = r.ordenadas.map(function(p){
+    return barraFila('P' + p.num, p.pct + '% (' + p.intentos + ' intentos)', p.pct, p.pct < 50);
+  }).join('');
+  $('res-mas-fallada').innerHTML = '<b>Pregunta ' + r.masFallada.num + '</b> (' + r.masFallada.pct +
+    '% de aciertos): «' + escaparHtml(r.masFallada.texto) + '»';
+  $('res-mas-acertada').innerHTML = '<b>Pregunta ' + r.masAcertada.num + '</b> (' + r.masAcertada.pct +
+    '% de aciertos): «' + escaparHtml(r.masAcertada.texto) + '»';
+  $('res-huella').textContent = deOtroBanco
+    ? '⚠️ ' + deOtroBanco + ' código(s) traen la huella de OTRO banco y no se mezclaron en el análisis por pregunta. Carga en el Constructor el banco con el que jugó tu grupo pa’ analizarlos.'
+    : '';
+  $('panel-resultados').classList.remove('oculto');
+  try { store.set('em1-panel', texto); } catch(e){}
+}
+$('btn-analizar').addEventListener('click', function(){ ejecutarAnalisis($('panel-entrada').value); });
+$('btn-ejemplo-panel').addEventListener('click', function(){
+  banco = JSON.parse(JSON.stringify(BANCO_EJEMPLO));
+  $('banco-titulo').value = banco.titulo;
+  guardarBanco(); pintarConstructor(); actualizarPanelBanco();
+  const h = huellaBanco(banco);
+  const orden = banco.preguntas.map(function(_, i){ return i; });
+  const patrones = [
+    ['Ana María (ejemplo)',  [1,1,1,1,1,1,1,1,1,1]],
+    ['Luis (ejemplo)',       [1,1,1,1,0,1,1,1,1,0]],
+    ['María José (ejemplo)', [1,0,1,0,1,1,0,1,0,1]],
+    ['Carlos (ejemplo)',     [0,1,1,0,0,1,0,1,0,0]],
+    ['Sofía (ejemplo)',      [1,0,0,0,1,0,1,0,1,0]]
+  ];
+  $('panel-entrada').value = patrones.map(function(par){
+    return codificarResultado(par[0], h, par[1], orden.slice());
+  }).join('\n');
+  $('msg-panel').className = 'mensaje bien';
+  $('msg-panel').textContent = '👀 Datos de EJEMPLO (5 estudiantes ficticios) sobre el banco «Los Animales». Pulsa «Analizar» pa’ ver el panel en acción.';
+});
+
+/* ================= ARRANQUE ================= */
+(function(){
+  /* 1) ¿Banco en el enlace? (#b=...) */
+  try {
+    const m = location.hash.match(/[#&]b=([A-Za-z0-9\-_]+)/);
+    if (m){
+      const desdeEnlace = decodificarBanco(m[1]);
+      if (desdeEnlace && desdeEnlace.preguntas.length >= 1){
+        banco = desdeEnlace; bancoDesdeEnlace = true;
+      }
+    }
+  } catch(e){}
+  /* 2) Si no, el banco guardado del maestro */
+  if (!bancoDesdeEnlace){
+    try {
+      const guardado = store.get('em1-banco');
+      if (guardado){
+        const parsed = JSON.parse(guardado);
+        if (parsed && Array.isArray(parsed.preguntas) && parsed.preguntas.length) banco = parsed;
+      }
+    } catch(e){}
+  }
+  if (!banco.preguntas.length){
+    banco = { titulo:'', preguntas: [ { texto:'', opciones:['','','',''], correcta:-1 } ] };
+  }
+  $('banco-titulo').value = banco.titulo || '';
+  pintarConstructor();
+  if (bancoDesdeEnlace){
+    $('msg-constructor').className = 'mensaje bien';
+    $('msg-constructor').textContent = '🔗 Banco cargado desde el enlace compartido: «' + (banco.titulo || 'Sin título') +
+      '» (' + banco.preguntas.length + ' preguntas). Puedes jugar ya o editarlo aquí.';
+    if (bancoListoParaJugar()) mostrarVista('juego');
+  }
+  try {
+    const ultimoPanel = store.get('em1-panel');
+    if (ultimoPanel) $('panel-entrada').value = ultimoPanel;
+  } catch(e){}
+  actualizarInicioJuego();
+})();
+</script>
+</body>
+</html>
